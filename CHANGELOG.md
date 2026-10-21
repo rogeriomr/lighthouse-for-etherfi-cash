@@ -2,6 +2,12 @@
 
 All notable changes to this project. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/) (still `0.x`: anything may change). How to cut a release: [docs/RELEASING.md](docs/RELEASING.md).
 
+## [Unreleased]
+
+### Security
+
+- Raised the Node.js baseline to 22.23.4 (CI also covers 24.22.1; the 26.x line starts at 26.12.1) for the October 2026 security releases. No application code changed.
+
 ## [0.1.0] - 2026-10-21
 
 First public version.

@@ -46,7 +46,7 @@ Uma linha no topo sempre diz de onde vêm os números e até onde vai o históri
 <details>
 <summary>Não programa? Cole isto no <a href="https://claude.com/claude-code">Claude Code</a> no seu próprio computador</summary>
 
-> Configure o Lighthouse for ether.fi Cash neste computador para mim. Clone https://github.com/rogeriomr/lighthouse-for-etherfi-cash e instale com `npm ci` (precisa do Node 22.13 ou mais novo; instale o Node se não houver). Mantenha meus dados fora do projeto e de qualquer pasta sincronizada na nuvem (OneDrive, iCloud Drive, Dropbox, Google Drive): antes do primeiro pull, crie a pasta lighthouse-data na minha pasta pessoal (~/lighthouse-data no macOS ou Linux, %USERPROFILE%\lighthouse-data no Windows); o Lighthouse a encontra sozinho, e o `node scripts/data-dir.mjs` confirma. Depois rode `npm run pull` e espere enquanto eu entro na página da ether.fi que vai abrir no meu navegador. Quando terminar, rode `npm run dev` e abra http://localhost:5173/?fixtures. Esta tarefa não precisa de email nem de outro conector. Nunca envie, faça commit nem compartilhe os arquivos de dados.
+> Configure o Lighthouse for ether.fi Cash neste computador para mim. Clone https://github.com/rogeriomr/lighthouse-for-etherfi-cash e instale com `npm ci` (precisa do Node 22.23.4 ou mais novo; instale o Node se não houver). Mantenha meus dados fora do projeto e de qualquer pasta sincronizada na nuvem (OneDrive, iCloud Drive, Dropbox, Google Drive): antes do primeiro pull, crie a pasta lighthouse-data na minha pasta pessoal (~/lighthouse-data no macOS ou Linux, %USERPROFILE%\lighthouse-data no Windows); o Lighthouse a encontra sozinho, e o `node scripts/data-dir.mjs` confirma. Depois rode `npm run pull` e espere enquanto eu entro na página da ether.fi que vai abrir no meu navegador. Quando terminar, rode `npm run dev` e abra http://localhost:5173/?fixtures. Esta tarefa não precisa de email nem de outro conector. Nunca envie, faça commit nem compartilhe os arquivos de dados.
 
 Use o app de computador ou a versão de terminal, não a web: o login da ether.fi volta para o seu próprio computador (`localhost`).
 </details>
@@ -57,7 +57,7 @@ O painel sabe falar com o conector MCP oficial da ether.fi (`https://mcp.ether.f
 
 ### O que funciona em qualquer build: puxar e importar
 
-1. Numa cópia deste projeto no seu computador, rode **`npm run pull`** (Node ≥ 22.13). Ele registra um cliente OAuth público, abre a tela de consentimento da ether.fi, segue todas as páginas do extrato e grava as respostas cruas em arquivos `.json`. O token fica só na memória. A conexão aparece no app da ether.fi em *Settings → AI Connections*, onde dá para revogá-la.
+1. Numa cópia deste projeto no seu computador, rode **`npm run pull`** (Node ≥ 22.23.4). Ele registra um cliente OAuth público, abre a tela de consentimento da ether.fi, segue todas as páginas do extrato e grava as respostas cruas em arquivos `.json`. O token fica só na memória. A conexão aparece no app da ether.fi em *Settings → AI Connections*, onde dá para revogá-la.
 2. Abra o painel (o seu deploy, `npm run preview` ou `npm run dev`), vá em **Portfólio → Conexão** e **importe os `.json`** pelo seletor de arquivos ou arrastando e soltando. Os arquivos são lidos no navegador; nada é enviado.
 3. Por padrão os dados ficam só na memória da aba. **Lembrar neste navegador** guarda no IndexedDB; **Esquecer estes arquivos** apaga.
 
@@ -151,7 +151,7 @@ Deploy numa subpasta: faça o build com o `--base` do Vite (por exemplo, `npm ru
 
 ## Desenvolvimento
 
-Você precisa do **Node ≥ 22.13** (o `.nvmrc` diz 22). Os checks rodam TypeScript direto com `--experimental-strip-types`, que versões mais antigas do Node não têm.
+Você precisa do **Node ≥ 22.23.4** (o `.nvmrc` diz 22.23.4). Os checks rodam TypeScript direto com `--experimental-strip-types`, que versões mais antigas do Node não têm.
 
 ```bash
 npm ci

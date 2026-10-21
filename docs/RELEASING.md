@@ -78,12 +78,12 @@ gh api -X PUT repos/$R/automated-security-fixes
 
 ### 6. Protect `main` and require the CI
 
-Wait for the first CI run to finish green (*Actions* tab): its two jobs are named **Node 22** and **Node 24**. Then:
+Wait for the first CI run to finish green (*Actions* tab): its two jobs are named **Node 22.23.4** and **Node 24.22.1**. Then:
 
 ```bash
 gh api -X PUT repos/$R/branches/main/protection --input - <<'EOF'
 {
-  "required_status_checks": { "strict": true, "contexts": ["Node 22", "Node 24"] },
+  "required_status_checks": { "strict": true, "contexts": ["Node 22.23.4", "Node 24.22.1"] },
   "enforce_admins": false,
   "required_pull_request_reviews": null,
   "restrictions": null,
@@ -132,6 +132,6 @@ Lista do dono para o primeiro push público, na ordem:
 3. **Conferir o que entra:** `git add -n .`, `git status --ignored --short` e `git check-ignore -v …` (passo 3). Nada de `fixtures/live/`, `fixtures/.pull-client.json`, `dist/`, `node_modules/`, `.claude/`, `*.tsbuildinfo`, `.env*`, `*.local.json`, exportações `.ics`/`.csv`/`.har` nem prints de conta real; em `fixtures/` só entra `fixtures/sample/`. Deploy pela CLI da Vercel a partir desta pasta depende do `.vercelignore` (a CLI não lê o `.gitignore`). Depois do 1º commit, `git log -1 --format='%an <%ae>'` tem de mostrar o noreply.
 4. **Enviar:** o repositório remoto já existe (público e vazio): `git remote add origin https://github.com/rogeriomr/lighthouse-for-etherfi-cash.git` e `git push -u origin main` (passo 4).
 5. **Segurança:** relato privado de vulnerabilidade, secret scanning com push protection, alertas e atualizações de segurança do Dependabot (passo 5).
-6. **Proteger a `main`:** depois do 1º CI verde, exigir os checks **Node 22** e **Node 24** (passo 6).
+6. **Proteger a `main`:** depois do 1º CI verde, exigir os checks **Node 22.23.4** e **Node 24.22.1** (passo 6).
 7. **Descrição e tópicos** (passo 7), e, se quiser, a imagem de prévia com a captura do demo.
 8. **Release v0.1.0:** passar o "Unreleased" do CHANGELOG para a versão com a data, conferir tudo de novo, `git tag -a v0.1.0`, `git push origin main v0.1.0` e `gh release create v0.1.0` (seção "Cutting a release").

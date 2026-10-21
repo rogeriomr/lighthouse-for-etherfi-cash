@@ -46,7 +46,7 @@ A line at the top always says where the numbers come from and how far back the l
 <details>
 <summary>Don't program? Paste this into <a href="https://claude.com/claude-code">Claude Code</a> on your own computer</summary>
 
-> Set up Lighthouse for ether.fi Cash on this computer for me. Clone https://github.com/rogeriomr/lighthouse-for-etherfi-cash and install it with `npm ci` (it needs Node 22.13 or newer; install Node if it is missing). Keep my data out of the project and out of any cloud-synced folder (OneDrive, iCloud Drive, Dropbox, Google Drive): before the first pull, create the folder lighthouse-data in my home folder (~/lighthouse-data on macOS or Linux, %USERPROFILE%\lighthouse-data on Windows); Lighthouse finds it on its own, and `node scripts/data-dir.mjs` confirms it. Then run `npm run pull` and wait while I sign in on the ether.fi page that opens in my browser. When it finishes, run `npm run dev` and open http://localhost:5173/?fixtures. This task needs no email or other connector. Never upload, commit, send or share the data files.
+> Set up Lighthouse for ether.fi Cash on this computer for me. Clone https://github.com/rogeriomr/lighthouse-for-etherfi-cash and install it with `npm ci` (it needs Node 22.23.4 or newer; install Node if it is missing). Keep my data out of the project and out of any cloud-synced folder (OneDrive, iCloud Drive, Dropbox, Google Drive): before the first pull, create the folder lighthouse-data in my home folder (~/lighthouse-data on macOS or Linux, %USERPROFILE%\lighthouse-data on Windows); Lighthouse finds it on its own, and `node scripts/data-dir.mjs` confirms it. Then run `npm run pull` and wait while I sign in on the ether.fi page that opens in my browser. When it finishes, run `npm run dev` and open http://localhost:5173/?fixtures. This task needs no email or other connector. Never upload, commit, send or share the data files.
 
 Use the desktop app or the terminal version, not the web one: ether.fi's sign-in comes back to your own computer (`localhost`).
 </details>
@@ -57,7 +57,7 @@ The dashboard can talk to ether.fi's official MCP connector (`https://mcp.ether.
 
 ### What works in any build: pull, then import
 
-1. In a copy of this project on your computer, run **`npm run pull`** (Node ≥ 22.13). It registers a public OAuth client, opens ether.fi's consent screen, follows every page of the statement and saves the raw responses as `.json` files. The token stays in memory only. The connection shows up in the ether.fi app under *Settings → AI Connections*, where you can revoke it.
+1. In a copy of this project on your computer, run **`npm run pull`** (Node ≥ 22.23.4). It registers a public OAuth client, opens ether.fi's consent screen, follows every page of the statement and saves the raw responses as `.json` files. The token stays in memory only. The connection shows up in the ether.fi app under *Settings → AI Connections*, where you can revoke it.
 2. Open the dashboard (your deployment, `npm run preview` or `npm run dev`), go to **Portfolio → Connection** and **import the `.json` files** with the file picker or by drag and drop. The files are read in the browser; nothing is uploaded.
 3. By default the data stays in the tab's memory only. **Remember in this browser** keeps it in IndexedDB; **Forget these files** erases it.
 
@@ -151,7 +151,7 @@ Deploying under a subfolder: build with Vite's `--base` (for example `npm run bu
 
 ## Development
 
-You need **Node ≥ 22.13** (`.nvmrc` says 22). The checks run TypeScript directly with `--experimental-strip-types`, which older Node versions don't have.
+You need **Node ≥ 22.23.4** (`.nvmrc` says 22.23.4). The checks run TypeScript directly with `--experimental-strip-types`, which older Node versions don't have.
 
 ```bash
 npm ci

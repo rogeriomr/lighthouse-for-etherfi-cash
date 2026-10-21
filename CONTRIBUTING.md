@@ -15,7 +15,7 @@ Financial data is personal and a push is forever. Never put real transactions, m
 
 ## Setup
 
-You need **Node ≥ 22.13** (`.nvmrc` says 22.13.0; the checks use `--experimental-strip-types`, which older Node versions don't have) and npm.
+You need **Node ≥ 22.23.4** (`.nvmrc` says 22.23.4; the checks use `--experimental-strip-types`, which older Node versions don't have) and npm.
 
 ```bash
 npm ci
@@ -52,7 +52,7 @@ npm run privacy    # compares the repo (and dist/) with your real data; skips if
 | `check-insights` | monthly insights, rewards since the last snapshot, and the AI summary boundary |
 | `check-security` | parser and storage hardening: absurd or malformed values, oversized merchant rules, prototype names, untrusted deposit addresses |
 
-The checks never print real values: with a real data folder present they only assert invariants (counts, sums matching, nothing dropped). Keep it that way. CI runs typecheck, lint, build, check and privacy on Node 22 and 24, without real data.
+The checks never print real values: with a real data folder present they only assert invariants (counts, sums matching, nothing dropped). Keep it that way. CI runs typecheck, lint, build, check and privacy on Node 22.23.4 and 24.22.1, without real data.
 
 ## Synthetic fixtures
 
@@ -108,7 +108,7 @@ Maintainers: the first public push (git identity with the noreply email, what mu
 Obrigado por ajudar! **Não precisa de conta da ether.fi**: o demo e as fixtures sintéticas cobrem todas as telas.
 
 - **Regra principal:** nunca versione dados reais. Nada de transações, nomes da fatura, valores, endereços, ids, dígitos de cartão, emails, tokens ou prints da conta em código, comentários, testes, fixtures, docs, issues, PRs ou commits. Exemplos são sempre inventados. Os dados reais ficam só na pasta de dados, fora do git. Um resolvedor só (`scripts/data-dir.mjs`) a escolhe para o pull, o dev, os checks e a varredura, nesta ordem: `LIGHTHOUSE_DATA_DIR`; `lighthouse-data` na sua pasta de usuário (`%USERPROFILE%\lighthouse-data`, `~/lighthouse-data`), se existir; `fixtures/live/` (no `.gitignore`). Prefira a pasta de usuário, fora do projeto e **fora de pastas sincronizadas com a nuvem** (OneDrive, iCloud, Dropbox). `node scripts/data-dir.mjs` mostra qual vale; o pull recusa pasta dentro do projeto que não seja `fixtures/live/`.
-- **Ambiente:** Node ≥ 22.13 (os checks usam `--experimental-strip-types`) e `npm ci`. `npm run dev` abre o demo; `?fixtures=sample` usa as respostas sintéticas de `fixtures/sample/`; `?fixtures` usa os seus dados do `npm run pull` (só no dev).
+- **Ambiente:** Node ≥ 22.23.4 (os checks usam `--experimental-strip-types`) e `npm ci`. `npm run dev` abre o demo; `?fixtures=sample` usa as respostas sintéticas de `fixtures/sample/`; `?fixtures` usa os seus dados do `npm run pull` (só no dev).
 - **Checks:** `npm run typecheck`, `npm run lint` (hooks do React são erro, o resto é aviso), `npm run build`, `npm run check` (os 9 scripts `check-*.mts`) e `npm run privacy`. Os checks nunca imprimem valores reais.
 - **Fixtures sintéticas:** geradas por `node scripts/gen-sample.mjs` (determinístico). Mudou a leitura do conector? Acrescente o caso no gerador e confira em `scripts/check-sample.mts`.
 - **Varredura de privacidade como pré-commit:** `npm run privacy` compara o que seria publicado com os seus dados reais e mostra só `arquivo:linha`, o nível e o tipo. Instale o hook com os dois comandos acima. **GRAVE** (descritor completo com número, código de loja, filial, CNPJ ou nome de 3+ palavras; par estabelecimento + valor; ids, endereços, emails, últimos 4 dígitos, assuntos, timestamps, notas da pesquisa local) sempre vira exemplo fictício. **Aviso** (token de marca de 1 ou 2 palavras que coincide com a fatura, a pesquisa ou as regras locais, ou página pública de ajuda) vira fictício ou, se for marca grande e útil a qualquer pessoa, entra em `scripts/privacy-allow.json` com o motivo. Nada de nicho entra lá. Sai com 1 se houver grave ou aviso fora da allowlist.
