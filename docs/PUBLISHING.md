@@ -36,8 +36,8 @@ O `.vercelignore` repete o critério para quem faz deploy pela CLI da Vercel, qu
 
 ## 3. Estado publicado (21/10/2026)
 
-- Repositório público `rogeriomr/lighthouse-for-etherfi-cash`; `main` no commit `389c01e` ("Lighthouse for ether.fi
-  Cash 0.1.0"), árvore limpa e upstream `origin/main` via SSH.
+- Repositório público `rogeriomr/lighthouse-for-etherfi-cash`; `main` atualizado com o patch de segurança do Node
+  22.23.4, árvore limpa e upstream `origin/main` via SSH.
 - Demo em produção: <https://lighthouse-for-etherfi-cash.vercel.app>. O projeto na Vercel não tem integração Git; o
   deploy é feito pela CLI (`vercel deploy --prod --yes`). Último deploy validado: HTTP 200, CSP/CORP presentes e
   `/callback` com `no-store`.
