@@ -1,0 +1,70 @@
+name: Bug report · Relatar um problema
+description: Something looks wrong or breaks. · Algo está errado ou quebra.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > [!CAUTION]
+        > **Do not paste your financial data.** Issues are public and indexed forever. Never include transactions, merchant names from your statement, amounts, balances, wallet or deposit addresses, card digits, tokens, the files from `npm run pull`, or screenshots of your account.
+        > Reproduce it in the **demo** (`/`) or with the **synthetic fixtures** (`?fixtures=sample` in dev). If only your real data triggers it, describe the *shape* ("a refund in another currency on a page marked incomplete"), not the values.
+        >
+        > **Não cole seus dados financeiros.** A issue é pública e fica indexada para sempre. Nada de transações, nomes da sua fatura, valores, saldos, endereços de carteira ou de depósito, dígitos de cartão, tokens, arquivos do `npm run pull` ou prints da sua conta. Reproduza no **demo** ou com `?fixtures=sample`; se só os seus dados disparam o problema, descreva a *forma*, não os valores.
+        >
+        > Security problem? Use **Security → Report a vulnerability** instead. · Falha de segurança? Use **Security → Report a vulnerability**.
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy · Privacidade
+      options:
+        - label: This issue has no real transactions, addresses, card digits or account screenshots. · Esta issue não tem transações, endereços, dígitos de cartão nem prints reais.
+          required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Where does it happen? · Onde acontece?
+      options:
+        - Demo (no connection) · Demo (sem conexão)
+        - Synthetic fixtures (?fixtures=sample) · Fixtures sintéticas
+        - Imported files (npm run pull) · Arquivos importados
+        - Connected (live) · Conectado (ao vivo)
+        - Scripts / build / checks
+    validations:
+      required: true
+  - type: input
+    id: screen
+    attributes:
+      label: Screen or route · Tela ou rota
+      placeholder: "#/subscriptions, #/history…"
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce · Passos para reproduzir
+      placeholder: |
+        1. Open the demo at 390 px wide
+        2. Switch to PT
+        3. …
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected and what happened · O que esperava e o que aconteceu
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Browser, OS and screen width · Navegador, sistema e largura da tela
+      placeholder: Edge 141 on Windows 11, 1366 px · Safari on iPhone, 390 px
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit · Versão ou commit
+      placeholder: 0.1.0 / abc1234
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console errors or check output (review before pasting) · Erros do console ou saída dos checks (revise antes de colar)
+      description: The checks never print real values, but the browser console can. Remove anything that looks like a merchant, amount, id or address. · Os checks não imprimem valores reais, mas o console do navegador pode.
+      render: text

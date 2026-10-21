@@ -1,0 +1,45 @@
+{
+  "rules": [
+    {
+      "match": "^QUICKBITE\\*",
+      "name": "QuickBite",
+      "category": "delivery",
+      "brand": "QuickBite"
+    },
+    {
+      "match": "TRATTORIA FINTA",
+      "name": "Trattoria Finta",
+      "category": "dining"
+    },
+    {
+      "match": "^KIOSK 24",
+      "name": {
+        "en": "Kiosk 24 · convenience store",
+        "pt": "Kiosk 24 · loja de conveniência"
+      },
+      "category": "groceries"
+    },
+    {
+      "match": "HOMEWARD GARDEN",
+      "name": "Homeward Garden Supply",
+      "category": "home"
+    },
+    {
+      "match": "PIXELFLOW",
+      "name": "Pixelflow Studio",
+      "category": "software",
+      "brand": "Pixelflow",
+      "subscription": true
+    },
+    {
+      "match": "^RAILHOP",
+      "name": {
+        "en": "Railhop · train tickets",
+        "pt": "Railhop · passagens de trem"
+      }
+    }
+  ],
+  "accents": {
+    "lumen": "lúmen"
+  }
+}

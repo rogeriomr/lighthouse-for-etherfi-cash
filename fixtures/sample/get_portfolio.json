@@ -1,0 +1,78 @@
+{
+  "hasVault": true,
+  "accountLabel": "Sample account (synthetic)",
+  "tradingPositionsIncluded": true,
+  "unrenderableAssetCount": 1,
+  "groups": [
+    {
+      "id": "liquidVaults",
+      "label": "Liquid vaults"
+    },
+    {
+      "id": "value-accruing",
+      "label": "Staking"
+    },
+    {
+      "id": "crypto",
+      "label": "Crypto"
+    }
+  ],
+  "holdings": [
+    {
+      "symbol": "liquidUSD",
+      "name": "USD Yield",
+      "valueUsd": "2450.18",
+      "collateral": true,
+      "apy": 6.2,
+      "groupId": "liquidVaults",
+      "chainId": 10,
+      "quantity": null,
+      "vault": "cash"
+    },
+    {
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "valueUsd": "812.4",
+      "collateral": true,
+      "apy": 0,
+      "groupId": "crypto",
+      "chainId": 10,
+      "quantity": {
+        "amount": "812400000",
+        "decimals": 6,
+        "symbol": "USDC"
+      },
+      "vault": "cash"
+    },
+    {
+      "symbol": "weETH",
+      "name": "Staked ETH",
+      "valueUsd": "3120.55",
+      "collateral": true,
+      "apy": 2.9,
+      "groupId": "value-accruing",
+      "chainId": 10,
+      "quantity": {
+        "amount": "950000000000000000",
+        "decimals": 18,
+        "symbol": "weETH"
+      },
+      "vault": "cash"
+    },
+    {
+      "symbol": "ETHFI",
+      "name": "ether.fi governance token",
+      "valueUsd": "96.3",
+      "collateral": false,
+      "apy": 0,
+      "groupId": "crypto",
+      "chainId": 10,
+      "quantity": {
+        "amount": "107000000000000000000",
+        "decimals": 18,
+        "symbol": "ETHFI"
+      },
+      "vault": "cash"
+    }
+  ]
+}

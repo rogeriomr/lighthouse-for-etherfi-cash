@@ -1,0 +1,105 @@
+{
+  "generatedAt": "2026-10-14T09:00:00Z",
+  "items": [
+    {
+      "name": "Lingoleap",
+      "matchers": [
+        "lingoleap"
+      ],
+      "autoRenew": "yes",
+      "noticeBeforeRenewal": "yes",
+      "noticeDays": 14,
+      "cancelDeadline": {
+        "en": "Until 24 hours before the renewal date",
+        "pt": "Até 24 horas antes da data de renovação"
+      },
+      "refundWindowDays": 30,
+      "refundNote": {
+        "en": "Full refund within 30 days of an annual renewal, on request.",
+        "pt": "Reembolso integral até 30 dias depois da renovação anual, se pedir."
+      },
+      "manageUrl": "https://lingoleap.example/settings/subscription",
+      "sources": [
+        "https://lingoleap.example/terms",
+        "email: Lingoleap: your annual plan renews on Sep 28, 2026-09-14"
+      ],
+      "checked": [
+        "website",
+        "email"
+      ],
+      "checkedAt": "2026-10-01",
+      "risk": "medium",
+      "riskReasons": [
+        {
+          "en": "Annual plan that renews by itself",
+          "pt": "Plano anual que renova sozinho"
+        },
+        {
+          "en": "Sends a notice 14 days before",
+          "pt": "Avisa 14 dias antes"
+        }
+      ]
+    },
+    {
+      "name": "FitPulse Club",
+      "matchers": [
+        "fitpulse"
+      ],
+      "autoRenew": "yes",
+      "noticeBeforeRenewal": "no",
+      "cancelDeadline": {
+        "en": "Written notice 30 days before the next charge",
+        "pt": "Aviso por escrito 30 dias antes da próxima cobrança"
+      },
+      "refundWindowDays": 0,
+      "priceChangeAtRenewal": {
+        "en": "Price went from 39 to 44 EUR in September",
+        "pt": "O preço passou de 39 para 44 EUR em setembro"
+      },
+      "sources": [
+        "https://fitpulse.example/membership-terms",
+        "email: FitPulse: new monthly price from September, 2026-08-20"
+      ],
+      "checked": [
+        "website",
+        "email"
+      ],
+      "checkedAt": "2026-10-01",
+      "risk": "high",
+      "riskReasons": [
+        {
+          "en": "No reminder before each charge",
+          "pt": "Nenhum aviso antes de cada cobrança"
+        },
+        {
+          "en": "30-day notice to cancel",
+          "pt": "Cancelamento com 30 dias de aviso"
+        }
+      ]
+    },
+    {
+      "name": "NimbusBox",
+      "matchers": [
+        "nimbusbox"
+      ],
+      "autoRenew": "yes",
+      "noticeBeforeRenewal": "no",
+      "refundWindowDays": 0,
+      "manageUrl": "https://nimbusbox.example/settings/plan",
+      "sources": [
+        "https://nimbusbox.example/plans"
+      ],
+      "checked": [
+        "website"
+      ],
+      "checkedAt": "2026-10-01",
+      "risk": "low",
+      "riskReasons": [
+        {
+          "en": "Small monthly charge, cancel any time",
+          "pt": "Cobrança mensal pequena, cancela quando quiser"
+        }
+      ]
+    }
+  ]
+}

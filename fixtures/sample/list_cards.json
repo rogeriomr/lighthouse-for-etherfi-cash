@@ -1,0 +1,37 @@
+{
+  "accountLabel": "Sample account (synthetic)",
+  "cards": [
+    {
+      "id": "00000000-0000-4000-9000-000000000001",
+      "nickname": "Daily",
+      "cardType": "VIRTUAL",
+      "last4": "0001",
+      "status": "ACTIVE",
+      "currency": "USD"
+    },
+    {
+      "id": "00000000-0000-4000-9000-000000000002",
+      "nickname": null,
+      "cardType": "VIRTUAL",
+      "last4": "0002",
+      "status": "ACTIVE",
+      "currency": "USD"
+    },
+    {
+      "id": "00000000-0000-4000-9000-000000000003",
+      "nickname": "Old travel card",
+      "cardType": "VIRTUAL",
+      "last4": "0003",
+      "status": "CANCELLED",
+      "currency": "USD"
+    },
+    {
+      "id": "00000000-0000-4000-9000-000000000004",
+      "nickname": "Physical",
+      "cardType": "PHYSICAL",
+      "last4": "0004",
+      "status": "NOT_ACTIVE",
+      "currency": "USD"
+    }
+  ]
+}

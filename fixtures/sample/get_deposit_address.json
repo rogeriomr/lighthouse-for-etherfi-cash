@@ -1,0 +1,108 @@
+{
+  "hasVault": true,
+  "address": "0xSAMPLE-FIXTURE-ADDRESS-NOT-REAL-DO-NOT-SEND",
+  "networks": [
+    "arbitrum",
+    "base",
+    "ethereum",
+    "optimism"
+  ],
+  "supportedAssets": [
+    {
+      "symbol": "USDC",
+      "name": "USD Coin",
+      "decimals": 6,
+      "ltv": "0.9",
+      "contracts": [
+        {
+          "network": "arbitrum",
+          "address": "0xSAMPLE-USDC-ARBITRUM-CONTRACT"
+        },
+        {
+          "network": "base",
+          "address": "0xSAMPLE-USDC-BASE-CONTRACT"
+        },
+        {
+          "network": "ethereum",
+          "address": "0xSAMPLE-USDC-ETHEREUM-CONTRACT"
+        },
+        {
+          "network": "optimism",
+          "address": "0xSAMPLE-USDC-OPTIMISM-CONTRACT"
+        }
+      ]
+    },
+    {
+      "symbol": "USDT",
+      "name": "Tether USD",
+      "decimals": 6,
+      "ltv": "0.9",
+      "contracts": [
+        {
+          "network": "ethereum",
+          "address": "0xSAMPLE-USDT-ETHEREUM-CONTRACT"
+        },
+        {
+          "network": "optimism",
+          "address": "0xSAMPLE-USDT-OPTIMISM-CONTRACT"
+        }
+      ]
+    },
+    {
+      "symbol": "WETH",
+      "name": "Wrapped Ether",
+      "decimals": 18,
+      "ltv": "0.8",
+      "contracts": [
+        {
+          "network": "base",
+          "address": "0xSAMPLE-WETH-BASE-CONTRACT"
+        },
+        {
+          "network": "ethereum",
+          "address": "0xSAMPLE-WETH-ETHEREUM-CONTRACT"
+        },
+        {
+          "network": "optimism",
+          "address": "0xSAMPLE-WETH-OPTIMISM-CONTRACT"
+        }
+      ]
+    },
+    {
+      "symbol": "weETH",
+      "name": "Staked ETH",
+      "decimals": 18,
+      "ltv": "0.75",
+      "contracts": [
+        {
+          "network": "base",
+          "address": "0xSAMPLE-WEETH-BASE-CONTRACT"
+        },
+        {
+          "network": "ethereum",
+          "address": "0xSAMPLE-WEETH-ETHEREUM-CONTRACT"
+        },
+        {
+          "network": "optimism",
+          "address": "0xSAMPLE-WEETH-OPTIMISM-CONTRACT"
+        }
+      ]
+    },
+    {
+      "symbol": "ETHFI",
+      "name": "ether.fi governance token",
+      "decimals": 18,
+      "ltv": "0.5",
+      "contracts": [
+        {
+          "network": "ethereum",
+          "address": "0xSAMPLE-ETHFI-ETHEREUM-CONTRACT"
+        },
+        {
+          "network": "optimism",
+          "address": "0xSAMPLE-ETHFI-OPTIMISM-CONTRACT"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "name": "lighthouse-for-etherfi-cash",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Your card, explained. Open-source, read-only dashboard for ether.fi Cash accounts that runs entirely in your browser.",
+  "license": "MIT",
+  "author": "@rogeriomenezesx (https://x.com/rogeriomenezesx)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rogeriomr/lighthouse-for-etherfi-cash.git"
+  },
+  "homepage": "https://github.com/rogeriomr/lighthouse-for-etherfi-cash#readme",
+  "bugs": {
+    "url": "https://github.com/rogeriomr/lighthouse-for-etherfi-cash/issues"
+  },
+  "type": "module",
+  "engines": {
+    "node": "^22.13.0 || >=24"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit -p .",
+    "lint": "eslint .",
+    "check": "node scripts/check-all.mjs",
+    "test": "node scripts/check-all.mjs",
+    "privacy": "node scripts/privacy-scan.mjs",
+    "pull": "node scripts/pull-history.mjs"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "eslint": "^10.13.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "tailwindcss": "^4.3.3",
+    "typescript": "~6.0.2",
+    "typescript-eslint": "^8.71.2",
+    "vite": "^8.3.0"
+  },
+  "dependencies": {
+    "@ark-ui/react": "^5.39.3",
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource/space-grotesk": "^5.3.0",
+    "lucide-react": "^1.55.0",
+    "qrcode.react": "^4.2.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  }
+}

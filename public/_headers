@@ -1,0 +1,24 @@
+# Cabeçalhos de segurança do deploy estático (Cloudflare Pages e Netlify leem este arquivo; o Vercel usa vercel.json,
+# com os mesmos valores: mude os dois juntos). O Vite copia public/ para dist/, então ele vai junto no build.
+# CSP: só o próprio site e o conector da ether.fi; fontes servidas pelo próprio site (fontsource), nada de terceiros;
+# Trusted Types sem nenhuma política, porque o app não escreve HTML a partir de texto.
+/*
+  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'self' https://mcp.ether.fi; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'; require-trusted-types-for 'script'; trusted-types 'none'
+  Referrer-Policy: no-referrer
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=(), interest-cohort=()
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+
+# o código de autorização não pode ficar em cache
+/callback
+  Cache-Control: no-store
+
+/manifest.webmanifest
+  Content-Type: application/manifest+json; charset=utf-8
+
+# arquivos com hash no nome: nunca mudam
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

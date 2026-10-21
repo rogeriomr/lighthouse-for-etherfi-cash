@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <title>Lighthouse for ether.fi Cash</title>
+  <!-- Marca do Lighthouse: farol com um facho. Uma cor só (dourado tan #ccaa77); o facho é a mesma cor a 50%. -->
+  <g fill="#ccaa77">
+    <path d="M15.5 9.9 29 4.6v10.6z" opacity=".5"/>
+    <path d="M11.5 2.8 16 7.2H7z"/>
+    <path d="M8.4 8h6.2v3.8H8.4z"/>
+    <path d="M8.1 12.8h6.8l1 6H7.1z"/>
+    <path d="M6.67 21.4h9.66l.97 5.8H5.7z"/>
+    <rect x="3.5" y="27.6" width="16" height="2.2" rx="1.1"/>
+  </g>
+</svg>

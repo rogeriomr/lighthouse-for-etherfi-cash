@@ -1,0 +1,33 @@
+# Dependabot: um PR por grupo, para não afogar o projeto em PRs pequenos. Atualizações de segurança continuam
+# chegando na hora (não dependem deste calendário). Todo PR passa pelo CI (typecheck, lint, build, check).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels: [dependencies]
+    commit-message:
+      prefix: deps
+    groups:
+      # menores e correções juntas: dependências de execução num PR, as de desenvolvimento em outro
+      runtime-minor:
+        dependency-type: production
+        update-types: [minor, patch]
+      dev-minor:
+        dependency-type: development
+        update-types: [minor, patch]
+    # versão maior chega sozinha, num PR próprio, para ser lida com calma
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    labels: [dependencies]
+    commit-message:
+      prefix: ci
+    groups:
+      actions:
+        patterns: ['*']

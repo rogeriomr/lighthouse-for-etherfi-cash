@@ -1,0 +1,11 @@
+{
+  "hasVault": true,
+  "accountLabel": "Sample account (synthetic)",
+  "address": "0xSAMPLE-FIXTURE-ADDRESS-NOT-REAL-DO-NOT-SEND",
+  "currency": "USD",
+  "totalBalance": "6479.43",
+  "availableBalance": "1840.2",
+  "creditLimit": "3000",
+  "borrowed": "412.75",
+  "tradingPositionsIncluded": true
+}

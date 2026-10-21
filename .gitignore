@@ -1,0 +1,57 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+coverage/
+*.local
+*.local.json
+*.tsbuildinfo
+.eslintcache
+
+# Respostas reais do MCP (dados financeiros pessoais): em fixtures/ só os sintéticos entram no git
+/fixtures/*
+!/fixtures/sample/
+**/.pull-client.json
+lighthouse-data/
+
+# JSON solto na raiz (um export, uma resposta salva à mão): só os do projeto entram
+/*.json
+!/package.json
+!/package-lock.json
+!/tsconfig.json
+!/vercel.json
+
+# Saídas que podem carregar dados reais: capturas de rede, calendário exportado, planilhas, pacotes e cópias
+*.har
+*.ics
+*.csv
+*.zip
+*.bak
+*~
+
+# Segredos
+.env*
+!.env.example
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.claude/
+.vercel/
+.DS_Store
+Thumbs.db
+desktop.ini
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

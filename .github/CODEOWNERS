@@ -1,0 +1,15 @@
+# Arquivos que mudam o que chega ao navegador de quem usa o painel: revisão do mantenedor antes do merge.
+# O `*` garante revisão em qualquer arquivo novo; as linhas abaixo destacam a superfície de segurança.
+* @rogeriomr
+/package.json @rogeriomr
+/package-lock.json @rogeriomr
+/vite.config.ts @rogeriomr
+/vercel.json @rogeriomr
+/netlify.toml @rogeriomr
+/public/_headers @rogeriomr
+/scripts/ @rogeriomr
+/.github/ @rogeriomr
+/src/lib/oauth.ts @rogeriomr
+/src/lib/mcp.ts @rogeriomr
+/src/lib/storage.ts @rogeriomr
+/src/lib/normalize.ts @rogeriomr

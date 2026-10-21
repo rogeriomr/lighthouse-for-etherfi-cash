@@ -1,0 +1,16 @@
+{
+  "name": "Lighthouse for ether.fi Cash",
+  "short_name": "Lighthouse",
+  "description": "Your card, explained. Independent open-source dashboard, not affiliated with ether.fi. Read-only, runs in your browser.",
+  "lang": "en",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0d0d0c",
+  "theme_color": "#0d0d0c",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

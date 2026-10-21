@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- "Adicionar à Tela de Início": ícone de 180px no iPhone e manifesto (instalável, abre sem a barra do navegador) -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0d0d0c" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="application-name" content="Lighthouse for ether.fi Cash" />
+    <meta name="apple-mobile-web-app-title" content="Lighthouse for ether.fi Cash" />
+    <meta name="description" content="Lighthouse for ether.fi Cash: your card, explained. Independent open-source dashboard, not affiliated with ether.fi. Read-only, runs in your browser." />
+    <meta property="og:title" content="Lighthouse for ether.fi Cash" />
+    <meta property="og:description" content="Your card, explained. Independent open-source dashboard, not affiliated with ether.fi. Read-only." />
+    <title>Lighthouse for ether.fi Cash · Your card, explained</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- sem estilo inline: a CSP de public/_headers só aceita CSS do próprio site -->
+    <noscript>
+      <p>Lighthouse for ether.fi Cash needs JavaScript: everything runs in your browser.</p>
+      <p lang="pt-BR">O Lighthouse for ether.fi Cash precisa de JavaScript: tudo roda no seu navegador.</p>
+    </noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

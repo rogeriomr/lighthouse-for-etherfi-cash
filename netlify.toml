@@ -1,0 +1,14 @@
+# Netlify: build e a rota de retorno do login. Os cabeçalhos de segurança ficam em public/_headers (o mesmo arquivo
+# serve o Cloudflare Pages), que o Vite copia para dist/.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22.13.0"
+
+# as telas usam #/rota; só o retorno do OAuth chega num caminho de verdade
+[[redirects]]
+  from = "/callback"
+  to = "/index.html"
+  status = 200

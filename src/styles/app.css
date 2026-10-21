@@ -1,0 +1,249 @@
+@import "tailwindcss";
+
+/*
+ * Convenção de toque (vale para todos os pacotes): tamanho de toque segue o PONTEIRO, não a largura.
+ * - A classe base é a de toque: alvos de 44px (min-h-11 ou .tap), campos com 16px (text-base, sem zoom do iOS),
+ *   texto de no mínimo 12px.
+ * - A densidade de desktop só entra com `pointer-fine:` (do Tailwind), combinável com largura:
+ *   `min-h-11 pointer-fine:sm:min-h-9`, `text-base pointer-fine:sm:text-xs`. Texto abaixo de 12px só com `pointer-fine:`.
+ * - `sm:`/`lg:` ficam para o desenho (colunas, o que aparece); celular deitado tem 844px e continua sendo toque.
+ * - `short:` = celular deitado (paisagem com até 500px de altura): o cromo fica compacto e nada é fixo além da barra.
+ */
+@custom-variant short (@media (orientation: landscape) and (max-height: 500px));
+
+/*
+ * Paleta em tons ether.fi: o modo escuro do guia de estilo do conector (example_library → style_guide).
+ * Página #0d0d0c, cartão #191816, texto #f3f0e8 e acento violeta #a99dff. Os tons do texto e das linhas são o
+ * texto sobre o cartão numa opacidade, já compostos em hex: o contraste fica fixo e os modificadores /NN funcionam.
+ * Texto: tudo ≥ 4,5:1 sobre bg, panel e panel2. Validação: scratchpad visual/paleta (relatorio.md, valida_paleta.mjs).
+ */
+@theme {
+  --color-bg: #0d0d0c;
+  --color-panel: #191816;
+  /* texto a 5% sobre o cartão */
+  --color-panel2: #242321;
+  /* linhas finas: texto a 10% e a 16% */
+  --color-line: #2f2e2b;
+  --color-line2: #3c3b38;
+  --color-ink: #f3f0e8;
+  /* texto a 62% (o "secundário" do guia): 6,6:1 no cartão */
+  --color-muted: #a09e98;
+  /* texto a 54%: 4,73:1 sobre o panel2. O guia usa 50% para rótulos, que dá 4,2:1 ali; os centavos esmaecidos também usam este */
+  --color-faint: #8f8d87;
+  /* borda de campo (busca, select): 3,49:1 sobre o painel e 3,09:1 sobre o panel2, acima do mínimo de 3:1 para o contorno de um controle (1.4.11) */
+  --color-field: #706e6a;
+  --color-accent: #a99dff;
+  --color-accent-ink: #1c1737;
+  /* status: verde e vermelho sóbrios ("Vou manter" e "Vou cancelar" seguem distintos no daltonismo, ΔE 8,3); warn é o gold do guia */
+  --color-good: #91dfb2;
+  --color-warn: #e3b967;
+  --color-bad: #ff8a80;
+  --color-info: #8cc7e6;
+  /* a marca do Lighthouse (o farol) fica no dourado tan do app da ether.fi: só no logo, não é cor de interface */
+  --color-brand: #ccaa77;
+  /*
+   * Uma cor fixa por classe de ativo (barra "Como está dividido" e lista do Portfólio), igual para todo mundo.
+   * Fiat é o neutro claro da tinta (como a série 2 do guia), cripto é o violeta do acento, outros é o cinza neutro.
+   * Validação no cartão #191816 (scratchpad visual/paleta/scripts/classes_mede.mjs): todas ≥ 3,49:1; entre todas
+   * os pares, ΔE ≥ 16,7 na visão normal e ≥ 12,9 em protanopia/deuteranopia (fiat × cripto 27,0); todas a ΔE ≥ 16,3
+   * de good, warn e bad, para nenhuma classe parecer alerta. São cores de marca no gráfico, não de texto: rótulo,
+   * valor e iniciais do chip ficam em ink/muted. Como texto, ações (4,0:1) e outros (3,5:1) não chegam a 4,5:1 no
+   * cartão, e sobre a própria tinta a 15% ações, commodities e outros também não.
+   */
+  --color-class-fiat: #fff4e2;
+  --color-class-crypto: #a99dff;
+  --color-class-stocks: #3876d6;
+  --color-class-bonds: #15ad95;
+  --color-class-commodities: #bc8000;
+  --color-class-other: #706e6a;
+
+  /* fontes servidas pelo próprio app (@fontsource, importadas em main.tsx): nenhuma requisição a terceiros */
+  --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* face de títulos: só no nome do produto, nos h1 e nos números-herói (classe font-display) */
+  --font-display: "Space Grotesk", "Inter Variable", "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --radius-panel: 16px;
+}
+
+html {
+  background: var(--color-bg);
+  color-scheme: dark;
+  /* o foco e o que um link abre nunca ficam sob o cabeçalho fixo nem sob a barra inferior do celular (2.4.11) */
+  scroll-padding-top: 4.75rem;
+  scroll-padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+  /* retorno ao toque: o preflight do Tailwind zera o realce nativo do iOS/Android; ele volta, no violeta do tema */
+  -webkit-tap-highlight-color: color-mix(in oklab, var(--color-accent) 18%, transparent);
+}
+
+@media (min-width: 1024px) {
+  html {
+    scroll-padding-bottom: 1.5rem;
+  }
+}
+
+/* celular deitado: o cabeçalho de cobertura não é fixo e a barra inferior é compacta (ícone e rótulo numa linha) */
+@media (orientation: landscape) and (max-height: 500px) {
+  html {
+    scroll-padding-top: 1rem;
+    scroll-padding-bottom: calc(3.75rem + env(safe-area-inset-bottom));
+  }
+}
+
+body {
+  margin: 0;
+  /* celular deitado: nada sob o entalhe (viewport-fit=cover no index.html) */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line2) transparent;
+}
+
+@layer base {
+  h1 {
+    font-family: var(--font-display);
+  }
+}
+
+/* ao trocar de tela o foco vai para o h1 (leitor de tela anuncia a tela); o título não ganha anel de foco */
+h1[tabindex="-1"]:focus {
+  outline: none;
+}
+
+/* faint com opacidade cai abaixo de 4,5:1 (3,89:1 a 80%): qualquer text-faint/NN usa a cor cheia, que dá 5,35:1 no cartão e 4,73:1 no panel2 */
+[class*="text-faint/"] {
+  color: var(--color-faint);
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Alvo de toque de pelo menos 44 × 44 px sem mudar o desenho: em tela de toque, uma área invisível centrada no
+ * controle (links de texto, "por quê?", botões compactos). O anel de foco continua no tamanho visível.
+ */
+@media (pointer: coarse) {
+  .tap {
+    position: relative;
+  }
+
+  .tap::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* barra fina no topo enquanto a tela tocada monta (a troca é uma transição): o toque foi aceito */
+.nav-progress {
+  animation: nav-progress 0.9s ease-in-out infinite;
+}
+
+@keyframes nav-progress {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}
+
+/* item aberto por um link (`target`): a tela rola até ele e aplica esta classe por ~2s */
+.target-flash {
+  animation: target-flash 2s ease-out 1;
+}
+
+@keyframes target-flash {
+  0%,
+  35% {
+    box-shadow: 0 0 0 2px var(--color-accent), 0 0 0 6px color-mix(in oklab, var(--color-accent) 18%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 2px transparent, 0 0 0 6px transparent;
+  }
+}
+
+/* a mesma ideia por dentro, para linhas num painel com overflow-hidden (que cortaria o anel externo) */
+.target-flash-inset {
+  animation: target-flash-inset 2s ease-out 1;
+}
+
+@keyframes target-flash-inset {
+  0%,
+  35% {
+    box-shadow: inset 0 0 0 2px var(--color-accent);
+    background-color: color-mix(in oklab, var(--color-panel2) 60%, transparent);
+  }
+  100% {
+    box-shadow: inset 0 0 0 2px transparent;
+    background-color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .target-flash {
+    animation: none;
+    box-shadow: 0 0 0 2px var(--color-accent);
+  }
+
+  .target-flash-inset {
+    animation: none;
+    box-shadow: inset 0 0 0 2px var(--color-accent);
+  }
+
+  /* sem rolagem suave, giro nem pulsar para quem pediu menos movimento */
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.panel {
+  background: var(--color-panel);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-panel);
+}
+
+.glow-accent {
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--color-accent) 22%, transparent),
+    0 8px 40px -12px color-mix(in oklab, var(--color-accent) 25%, transparent);
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-accent) 30%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+[data-focus-visible] {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* anel por dentro: linhas tocáveis num painel com overflow-hidden, que cortaria o anel de fora */
+.focus-inset:focus-visible {
+  outline-offset: -2px;
+  border-radius: 0;
+}

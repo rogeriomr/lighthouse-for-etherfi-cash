@@ -1,0 +1,43 @@
+name: Idea · Ideia
+description: Suggest a screen, a rule or an improvement. · Sugira uma tela, uma regra ou uma melhoria.
+labels: [idea]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > [!CAUTION]
+        > **Do not paste your financial data.** Explain the idea with made-up examples ("a monthly charge of $9.99 from *Example Streaming*"), never with rows, merchant names or amounts from your own statement, addresses, card digits or screenshots of your account.
+        >
+        > **Não cole seus dados financeiros.** Explique a ideia com exemplos inventados ("uma cobrança mensal de US$ 9,99 da *Streaming Exemplo*"), nunca com linhas, nomes ou valores da sua fatura, endereços, dígitos de cartão ou prints da sua conta.
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy · Privacidade
+      options:
+        - label: My examples are made up; nothing here comes from a real account. · Meus exemplos são inventados; nada aqui vem de uma conta real.
+          required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What question should the dashboard answer? · Que pergunta o painel deveria responder?
+      placeholder: "Which subscriptions renew next month and how much will they cost?"
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: How would it work? · Como funcionaria?
+      description: Screen, rule, where the data comes from (the connector only reads; there is no spending-total tool). · Tela, regra e de onde vem o dado (o conector só lê).
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives or references · Alternativas ou referências
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope · Escopo
+      options:
+        - label: It works without a server and without sending data to third parties. · Funciona sem servidor e sem mandar dados a terceiros.
+        - label: I can help build it. · Posso ajudar a fazer.

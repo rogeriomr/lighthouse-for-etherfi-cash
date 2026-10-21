@@ -1,0 +1,36 @@
+# Vercel CLI (`vercel` ou `vercel deploy` a partir desta pasta): sem este arquivo, ele envia tudo menos .git e
+# node_modules, inclusive os dados reais. O deploy pelo Git não precisa dele (o clone não tem os dados), mas o critério
+# é o mesmo do .gitignore para o que é pessoal. O build (tsc && vite build) usa src/, scripts/, public/, index.html e os
+# arquivos de configuração da raiz.
+
+# dados reais e o client_id do pull: em fixtures/ só os sintéticos
+/fixtures/*
+!/fixtures/sample/
+**/.pull-client.json
+*.local.json
+lighthouse-data/
+
+# JSON solto na raiz: só os do projeto
+/*.json
+!/package.json
+!/package-lock.json
+!/tsconfig.json
+!/vercel.json
+
+# saídas que podem carregar dados reais, segredos e o que não é do build
+*.har
+*.ics
+*.csv
+*.zip
+*.bak
+*~
+*.log
+.env*
+!.env.example
+dist/
+coverage/
+.eslintcache
+.claude/
+docs/screenshots/
+Thumbs.db
+desktop.ini

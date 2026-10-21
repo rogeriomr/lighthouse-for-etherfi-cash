@@ -1,0 +1,126 @@
+{
+  "generatedAt": "2026-10-14T09:00:00Z",
+  "items": [
+    {
+      "matchers": [
+        "pixelflow"
+      ],
+      "name": "Pixelflow Studio",
+      "isSubscription": "yes",
+      "cycles": [
+        "monthly",
+        "annual"
+      ],
+      "note": {
+        "en": "Design app billed monthly or yearly; the plan renews automatically.",
+        "pt": "App de design cobrado por mês ou por ano; o plano renova sozinho."
+      },
+      "manageUrl": "https://pixelflow.example/account/billing",
+      "domains": [
+        "pixelflow.example"
+      ],
+      "sources": [
+        "https://pixelflow.example/pricing"
+      ]
+    },
+    {
+      "matchers": [
+        "nimbusbox"
+      ],
+      "name": "NimbusBox",
+      "isSubscription": "yes",
+      "cycles": [
+        "monthly",
+        "annual"
+      ],
+      "note": {
+        "en": "Cloud storage; small monthly charge.",
+        "pt": "Armazenamento na nuvem; cobrança mensal pequena."
+      },
+      "manageUrl": "https://nimbusbox.example/settings/plan",
+      "domains": [
+        "nimbusbox.example"
+      ],
+      "sources": [
+        "https://nimbusbox.example/plans"
+      ]
+    },
+    {
+      "matchers": [
+        "streamora"
+      ],
+      "name": "Streamora",
+      "isSubscription": "yes",
+      "cycles": [
+        "monthly"
+      ],
+      "note": "Video streaming, monthly.",
+      "manageUrl": "https://streamora.example/account",
+      "domains": [
+        "streamora.example"
+      ],
+      "sources": [
+        "https://streamora.example/help/billing"
+      ]
+    },
+    {
+      "matchers": [
+        "fitpulse"
+      ],
+      "name": "FitPulse Club",
+      "isSubscription": "yes",
+      "cycles": [
+        "monthly"
+      ],
+      "note": {
+        "en": "Gym membership charged on the 1st; cancelling needs 30 days of notice.",
+        "pt": "Academia cobrada no dia 1; cancelar pede 30 dias de aviso."
+      },
+      "domains": [
+        "fitpulse.example"
+      ],
+      "sources": [
+        "https://fitpulse.example/membership-terms"
+      ]
+    },
+    {
+      "matchers": [
+        "lingoleap"
+      ],
+      "name": "Lingoleap",
+      "isSubscription": "yes",
+      "cycles": [
+        "annual",
+        "monthly"
+      ],
+      "note": {
+        "en": "Language-learning app; the annual plan renews on the same date each year.",
+        "pt": "App de idiomas; o plano anual renova na mesma data todo ano."
+      },
+      "manageUrl": "https://lingoleap.example/settings/subscription",
+      "domains": [
+        "lingoleap.example"
+      ],
+      "sources": [
+        "https://lingoleap.example/terms"
+      ]
+    },
+    {
+      "matchers": [
+        "greenleaf market"
+      ],
+      "name": "Greenleaf Market",
+      "isSubscription": "no",
+      "cycles": [
+        "unknown"
+      ],
+      "note": {
+        "en": "Supermarket: frequent purchases, not a subscription.",
+        "pt": "Supermercado: compras frequentes, não é assinatura."
+      },
+      "sources": [
+        "https://greenleaf.example/about"
+      ]
+    }
+  ]
+}

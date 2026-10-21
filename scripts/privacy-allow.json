@@ -1,0 +1,31 @@
+{
+  "$comment": [
+    "Allowlist do npm run privacy (scripts/privacy-scan.mjs): marcas públicas, úteis a qualquer pessoa, que o dicionário (src/lib/merchants.ts) ou a base pública (src/lib/subscriptionKnowledge.ts) precisam citar e que podem coincidir com a fatura de quem roda a varredura.",
+    "Vale só para o nível AVISO (token de marca com 1 ou 2 palavras, sem número, ou página pública de ajuda em https). Nunca vale para o GRAVE: descritor completo com número, código de loja, filial, CNPJ ou nome de pessoa, par estabelecimento + valor, ids, endereços, emails, últimos 4 dígitos, assuntos de email e timestamps.",
+    "Nada de nicho entra aqui. A lista inclui de propósito marcas grandes que ninguém precisou liberar, fica em ordem alfabética e todo motivo segue o mesmo formato (serviço, empresa, \"marca pública de uso comum\"): assim nem a ordem nem o texto revelam quais coincidiram com a fatura de alguém. O motivo também passa pela varredura."
+  ],
+  "public": [
+    { "token": "Amazon Music", "reason": "Streaming de música (Amazon). Marca pública de uso comum." },
+    { "token": "Amazon Prime", "reason": "Assinatura de varejo e vídeo (Amazon). Marca pública de uso comum." },
+    { "token": "Apple Music", "reason": "Streaming de música (Apple). Marca pública de uso comum." },
+    { "token": "Assaí Atacadista", "reason": "Rede de atacarejo (Assaí). Marca pública de uso comum." },
+    { "token": "Centauro", "reason": "Rede de artigos esportivos (Centauro). Marca pública de uso comum." },
+    { "token": "Disney Plus", "reason": "Streaming de vídeo (Disney). Marca pública de uso comum." },
+    { "token": "Game Pass", "reason": "Assinatura de jogos (Microsoft). Marca pública de uso comum." },
+    { "token": "Google One", "reason": "Armazenamento na nuvem (Google). Marca pública de uso comum." },
+    { "token": "Google Play", "reason": "Loja de apps (Google). Marca pública de uso comum." },
+    { "token": "Google Workspace", "reason": "Pacote de escritório (Google). Marca pública de uso comum." },
+    { "token": "https://support.google.com/googlepay/answer/7644142?hl=pt-br", "reason": "Página de ajuda sobre cobranças (Google). Página pública de uso comum." },
+    { "token": "iFood Clube", "reason": "Assinatura de delivery (iFood). Marca pública de uso comum." },
+    { "token": "Kindle Unlimited", "reason": "Assinatura de livros (Amazon). Marca pública de uso comum." },
+    { "token": "OpenAI API", "reason": "Cobrança por uso de API (OpenAI). Marca pública de uso comum." },
+    { "token": "Paramount Plus", "reason": "Streaming de vídeo (Paramount). Marca pública de uso comum." },
+    { "token": "PlayStation Plus", "reason": "Assinatura de jogos (Sony). Marca pública de uso comum." },
+    { "token": "Sem Parar", "reason": "Pedágio automático (Sem Parar). Marca pública de uso comum." },
+    { "token": "Smart Fit", "reason": "Rede de academias (Smart Fit). Marca pública de uso comum." },
+    { "token": "Spotify Premium", "reason": "Streaming de música (Spotify). Marca pública de uso comum." },
+    { "token": "Uber One", "reason": "Assinatura de transporte e delivery (Uber). Marca pública de uso comum." },
+    { "token": "Vercel Domains", "reason": "Registro de domínios (Vercel). Marca pública de uso comum." },
+    { "token": "YouTube Premium", "reason": "Streaming de vídeo (Google). Marca pública de uso comum." }
+  ]
+}

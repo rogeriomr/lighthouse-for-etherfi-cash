@@ -1,0 +1,74 @@
+{
+  "generatedAt": "2026-10-14T09:00:00Z",
+  "source": "synthetic sample (no real email)",
+  "items": [
+    {
+      "name": "Pixelflow Studio",
+      "matchers": [
+        "pixelflow"
+      ],
+      "kind": "receipt",
+      "emailDate": "2026-10-03",
+      "subject": "Your Pixelflow Studio receipt",
+      "plan": "Creator",
+      "amount": 12,
+      "currency": "USD",
+      "cycle": "monthly",
+      "periodEnd": "2026-11-03",
+      "manageUrl": "https://pixelflow.example/account/billing"
+    },
+    {
+      "name": "Streamora",
+      "matchers": [
+        "streamora"
+      ],
+      "kind": "cancellation",
+      "emailDate": "2026-09-25",
+      "subject": "Streamora: your subscription was cancelled",
+      "cycle": "monthly",
+      "periodEnd": "2026-10-21"
+    },
+    {
+      "name": "FitPulse Club",
+      "matchers": [
+        "fitpulse"
+      ],
+      "kind": "price_change",
+      "emailDate": "2026-08-20",
+      "subject": "FitPulse: new monthly price from September",
+      "plan": "Flex",
+      "amount": 44,
+      "currency": "EUR",
+      "cycle": "monthly"
+    },
+    {
+      "name": "Lingoleap",
+      "matchers": [
+        "lingoleap"
+      ],
+      "kind": "renewal_notice",
+      "emailDate": "2026-09-14",
+      "subject": "Lingoleap: your annual plan renews on Sep 28",
+      "plan": "Annual",
+      "amount": 119.99,
+      "currency": "USD",
+      "cycle": "annual",
+      "periodEnd": "2026-09-28",
+      "manageUrl": "https://lingoleap.example/settings/subscription"
+    },
+    {
+      "name": "Lingoleap",
+      "matchers": [
+        "lingoleap"
+      ],
+      "kind": "receipt",
+      "emailDate": "2026-09-28",
+      "subject": "Your Lingoleap receipt",
+      "plan": "Annual",
+      "amount": 119.99,
+      "currency": "USD",
+      "cycle": "annual",
+      "periodEnd": "2027-09-28"
+    }
+  ]
+}

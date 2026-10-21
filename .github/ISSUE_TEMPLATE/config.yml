@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability · Falha de segurança
+    url: https://github.com/rogeriomr/lighthouse-for-etherfi-cash/security/advisories/new
+    about: Report privately via Security → Report a vulnerability on this repository (see SECURITY.md). · Relate em particular pela aba Security (veja SECURITY.md).
+  - name: Problems with your ether.fi account, card or the connector · Problemas com a conta, o cartão ou o conector da ether.fi
+    url: https://www.ether.fi/cash
+    about: This project is independent and cannot see or change your account. Contact ether.fi support. · Projeto independente, sem acesso à sua conta. Fale com o suporte da ether.fi.
