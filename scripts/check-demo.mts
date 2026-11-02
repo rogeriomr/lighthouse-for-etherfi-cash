@@ -34,7 +34,7 @@ const of = (type: Transaction['type']) => tx.filter((t) => t.type === type);
 
 console.log('== dataset ==');
 check('referenceDate fixo do gerador', d.referenceDate === REF, d.referenceDate);
-check('1433 movimentos', tx.length === 1433, String(tx.length));
+check('1410 movimentos', tx.length === 1410, String(tx.length));
 check('em ordem crescente de data', tx.every((t, i) => i === 0 || tx[i - 1].date <= t.date));
 check('datas em ISO com Z, sem milissegundos, de jul/2025 a out/2026', tx.every((t) => /^20(25|26)-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(t.date)));
 check('nenhuma data depois do referenceDate', tx.every((t) => t.date.slice(0, 10) <= REF));
@@ -42,7 +42,7 @@ check('ids únicos', new Set(tx.map((t) => t.id)).size === tx.length);
 check('valores finitos', tx.every((t) => Number.isFinite(t.amount) && Number.isFinite(t.amountUsd)));
 const types: Record<string, number> = {};
 for (const t of tx) types[t.type] = (types[t.type] ?? 0) + 1;
-const TYPES: Record<string, number> = { purchase: 1374, top_up: 16, yield_deposit: 6, swap: 8, cashback_claim: 16, borrow: 3, repayment: 4, withdrawal: 2, bridge: 2, referral: 2 };
+const TYPES: Record<string, number> = { purchase: 1351, top_up: 16, yield_deposit: 6, swap: 8, cashback_claim: 16, borrow: 3, repayment: 4, withdrawal: 2, bridge: 2, referral: 2 };
 const byKey = (o: Record<string, number>) => JSON.stringify(Object.entries(o).sort((a, b) => a[0].localeCompare(b[0])));
 check('tipos: compras, depósitos, aplicações, trocas, resgates de cashback, empréstimos, pagamentos, saques, pontes e indicações', byKey(types) === byKey(TYPES), JSON.stringify(types));
 check('16 meses (jul/2025 a out/2026), todos com compras', new Set(tx.filter((t) => t.type === 'purchase').map((t) => t.date.slice(0, 7))).size === 16);
@@ -58,10 +58,11 @@ check('o cartão congelado não tem compra depois de maio', tx.filter((t) => t.c
 check('viagens no cartão Travel', tx.filter((t) => t.type === 'purchase' && t.city).every((t) => t.cardId === 'c2'));
 
 console.log('\n== totais de compras ==');
-check('7 dias: 713.58', sum(purchases('2026-10-06T00:00:00Z', '2026-10-12T23:59:59Z')) === 713.58);
-check('30 dias: 3425.38 em 91 linhas', sum(purchases('2026-09-13T00:00:00Z', '2026-10-12T23:59:59Z')) === 3425.38 && purchases('2026-09-13T00:00:00Z', '2026-10-12T23:59:59Z').length === 91);
-check('90 dias: 13429.33', sum(purchases('2026-07-15T00:00:00Z', '2026-10-12T23:59:59Z')) === 13429.33);
-check('tudo: 60145.12 (~40% acima dos 43014.07 da versão anterior)', sum(tx.filter((t) => t.type === 'purchase')) === 60145.12);
+check('7 dias: 855.57', sum(purchases('2026-10-06T00:00:00Z', '2026-10-12T23:59:59Z')) === 855.57);
+check('30 dias: 3613.77 em 91 linhas', sum(purchases('2026-09-13T00:00:00Z', '2026-10-12T23:59:59Z')) === 3613.77 && purchases('2026-09-13T00:00:00Z', '2026-10-12T23:59:59Z').length === 91);
+check('90 dias: 13485.84', sum(purchases('2026-07-15T00:00:00Z', '2026-10-12T23:59:59Z')) === 13485.84);
+// os meses inteiros seguem no alvo: as assinaturas caras (v2) entram no lugar de compras do dia a dia; só outubro sobe
+check('tudo: 60417.41', sum(tx.filter((t) => t.type === 'purchase')) === 60417.41);
 const TARGET: Record<string, number> = {
   '2025-07': 3140, '2025-08': 3340, '2025-09': 3230, '2025-10': 3610, '2025-11': 4270, '2025-12': 5270,
   '2026-01': 2930, '2026-02': 3050, '2026-03': 5610, '2026-04': 3460, '2026-05': 3670, '2026-06': 3140,
@@ -115,6 +116,13 @@ check('Spotify subiu em fevereiro (11.99 → 12.99) e seguiu', charges('Spotify 
   && charges('Spotify Premium').filter((t) => t.date > '2026-02').every((t) => t.amount === 12.99));
 check('parou de cobrar: a academia, a última em abril', charges('FitLab Gym').at(-1)?.date.startsWith('2026-04-01') === true && charges('FitLab Gym').length === 10);
 check('sobreposição: Claude e ChatGPT, os dois ativos em outubro ou setembro', charges('Claude.ai').at(-1)!.date >= '2026-09' && charges('ChatGPT Plus').at(-1)!.date >= '2026-10');
+// v2 da tela Ganhos: as assinaturas caras do dia a dia de quem cria, todas mensais e com valor fixo
+const pricey: [string, number, string][] = [['Claude.ai', 200, '2025-09'], ['Higgsfield', 129, '2026-04'], ['ElevenLabs', 99, '2026-01'], ['Midjourney Inc', 30, '2025-11'], ['Peloton', 12.99, '2026-02']];
+check('as caras de quem cria, mensais: Claude Ultra 200, Higgsfield Ultra 129, ElevenLabs Pro 99, Midjourney Standard 30 e Peloton App One 12,99, todo mês desde o começo de cada uma', pricey.every(([m, amount, from]) => {
+  const list = charges(m);
+  const months = new Set(list.map((t) => t.date.slice(0, 7)));
+  return list.length > 0 && list.every((t) => t.amount === amount) && list[0].date.startsWith(from) && months.size === list.length;
+}), pricey.map(([m]) => `${m}:${charges(m).length}`).join(', '));
 check('anual: Kestrel Notes duas vezes, com um ano entre elas', charges('Kestrel Notes').map((t) => t.date.slice(0, 10)).join() === '2025-10-01,2026-10-01');
 check('clube: Uber One desde janeiro, e corridas de Uber em todo mês', charges('Uber One')[0]?.date.startsWith('2026-01') === true
   && new Set(charges('Uber').filter((t) => t.currency === 'USD').map((t) => t.date.slice(0, 7))).size === 16);
@@ -131,8 +139,9 @@ check('plano de celular sem categoria conhecida (o nome diz "Wireless"), todo m�
 // cada assinatura com preço de tabela casa com a base pública (1%), para os cartões de Economia aparecerem com fonte
 const book = (service: string, amount: number, terms = false) => PRICE_BOOK.some((e) => e.service === service && e.country === 'US' && e.currency === 'USD'
   && (terms ? (e.terms ?? []).some((x) => Math.abs(x.total - amount) <= amount * 0.01) : e.monthly !== undefined && Math.abs(e.monthly - amount) <= amount * 0.01));
-check('preços da base pública (EUA): Claude Pro, Netflix, Spotify, YouTube pela loja e Uber One', book('claude-anthropic', charges('Claude.ai').at(-1)!.amount)
-  && book('netflix', 19.99) && book('spotify', 12.99) && book('youtube', charges('YouTube Premium').at(-1)!.amount) && book('uber-one', charges('Uber One').at(-1)!.amount));
+check('preços da base pública (EUA): Claude Ultra, Netflix, Spotify, YouTube pela loja, Uber One e as caras (Higgsfield, ElevenLabs, Midjourney, Peloton)', book('claude-anthropic', charges('Claude.ai').at(-1)!.amount)
+  && book('netflix', 19.99) && book('spotify', 12.99) && book('youtube', charges('YouTube Premium').at(-1)!.amount) && book('uber-one', charges('Uber One').at(-1)!.amount)
+  && book('higgsfield', 129) && book('elevenlabs', 99) && book('midjourney', 30) && book('peloton', 12.99));
 
 console.log('\n== conta, carteira e crédito ==');
 const holdingSum = R2(d.portfolio.holdings.reduce((s, h) => s + h.dollarValue, 0));

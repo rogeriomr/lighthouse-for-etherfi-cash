@@ -18,17 +18,19 @@ The interface is in **English by default**. Switch to Portuguese with the **EN |
 | ![Spending screen of the demo on a desktop browser](docs/screenshots/spending-desktop.png) | ![Spending screen of the demo on a phone](docs/screenshots/spending-mobile.png) |
 | ![Subscriptions screen of the demo on a desktop browser](docs/screenshots/subscriptions-desktop.png) | ![The "Start here" guide on a phone](docs/screenshots/start-mobile.png) |
 | ![AI Insights tab of the demo, turned on, on a desktop browser](docs/screenshots/insights-desktop.png) | |
+| ![Earnings screen of the demo on a desktop browser: what yield and cashback pay of the subscriptions](docs/screenshots/earnings-desktop.png) | |
 
 <sub>Screenshots of the demo and of the "Start here" guide (`#/start`): every number and name in them is fictional.</sub>
 
 ## What it does
 
-Six screens, each answering one question (on a phone they sit in a fixed bottom bar):
+Seven screens, each answering one question (on a phone, the main ones sit in a fixed bottom bar and the rest under **More**):
 
-- **Portfolio** (the first screen): what you have, in one sentence ("You have $12,480.55 at ether.fi"), with the value in your home currency next to it ("≈ R$68,500"), at the rate of your recent card purchases and labelled as an estimate. "How it’s split" shows each asset type’s share, in % and in dollars: fiat (with its currency, such as "Fiat · USD"), crypto, stocks, bonds, commodities and other. A dollar in a Liquid vault counts as fiat, and the list marks it as a vault. Beside it: estimated yield, spending power and what's borrowed, never added to the total. A line says how many things are waiting on you and leads to them in Spending. The cards, deposit (pick the asset to see the accepted networks) and the connection are tabs of this screen.
+- **Portfolio** (the first screen): what you have, in one sentence ("You have $12,480.55 at ether.fi"), with the value in your home currency next to it ("≈ R$68,500"), at the rate of your recent card purchases and labelled as an estimate. "How it’s split" shows each asset type’s share, in % and in dollars: fiat (with its currency, such as "Fiat · USD"), crypto, stocks, bonds, commodities and other. A dollar in a Liquid vault counts as fiat, and the list marks it as a vault. Beside it: estimated yield, spending power and what's borrowed, never added to the total. Right under the balance, **what your earnings pay**: your estimated earnings a month, where they come from, a bar with one block per recurring item (point at or tap a block to see the item, its cost and how much of it is paid) and how much in Liquid would cover 50%, 75% and 100% of your recurring costs. A line says how many things are waiting on you and leads to them in Spending. The cards, deposit (pick the asset to see the accepted networks) and the connection are tabs of this screen.
 - **Spending**: card purchases only, by category and merchant, with each day's bar split by category and the change against the previous period. "Needs attention" sits near the top: renewals to answer or check and unusual charges, each with its own "why?". Below come month by month, with the reason behind each jump, and trips when there are any.
 - **History**: every purchase on the account, month by month by category, plus what you spent the most on, who the money went to (by brand or merchant), where (by purchase currency, since ether.fi does not report city or country) and when (weekday × hour). It also lists the largest purchases and the full list. Tapping a chart filters the list.
 - **Subscriptions**: what is a subscription, its cycle, next renewal and cost. It warns 14, 7 and 2 days before each renewal (30 days too for high-risk ones), asks "keep it or cancel it?" every cycle and downloads a calendar (`.ics`) with the reminders.
+- **Earnings**: what your yield and cashback pay of what repeats every month ("Your earnings cover 10 of 17 subscriptions"), added up like a receipt. Each subscription shows its cost and the cashback it earns; then come the cashback on those, the cashback on the rest of your card spending, each Liquid vault with how much you have in it and what it earns a month, and other assets with an APY. They add up to your earnings a month, and the cents always add up. Cashback is your card spending base × a rate: the public rates of your plan (Core unless you pick another), with the rate observed in your claims beside it, or one you set. A flow shows the sources paying your subscriptions and recurring bills, cheapest first or in the order you set: each item paid in full (✓) or in part, plus what's left over. You can add items by hand (rent, a gym), leave one out of the count, and see the next milestones: how much more earning in Liquid would also cover the next item, at today's APY. **How much in Liquid would cover** 50%, 75% and 100% of your recurring costs is always on screen. **Since your last visit** lists what changed (an item now covered or no longer covered, a new recurring charge, a price, an APY, the total, the next milestone) with a "what if" line, and the Earnings menu item gets a dot when there is something new. **Take it to your AI** copies the month's sum as text for the AI you use. Every number has a "why?" with the math. It is an estimate and a scenario, never a recommendation; your choices stay in this browser.
 - **Activity**: everything that went through the account, grouped by day and filterable by what the money did. A deposit followed by a move to yield shows as a single movement.
 - **AI Insights** (optional, off by default): your own numbers, explained in cards. It covers credit and yield, including a slider for "if ETH fell X%", what your gains paid for, savings and the period summary. Every card has a "why?" with the math, a "Calculated here" badge, and "Estimate" where it applies. It is information and scenarios, not financial advice. Everything is calculated in this browser and nothing leaves it. Ready-made questions open Claude in a new tab, with the question in the link and none of your data; each one asks Claude to use only the ether.fi connector, read-only, and to treat merchant names and other text in the results as data, never as instructions. Turn it on and off in the tab itself; the choice is saved in this browser only.
 
@@ -134,6 +136,15 @@ Some special cases:
 
 The calendar (`.ics`) is generated in the browser: one event per subscription that repeats on its cycle, with alarms 14, 7 and 2 days before (and 30 for high risk). Importing it again updates the same events.
 
+## Your AI
+
+Lighthouse never calls an AI, but it prepares the ground for yours: the one that already knows you, and maybe your spending.
+
+- [`docs/ai/`](docs/ai/README.md): how Earnings is worked out ([earnings.md](docs/ai/earnings.md)), ready-made analyses ([presets.md](docs/ai/presets.md)) and public sources and APIs ([sources.md](docs/ai/sources.md)).
+- `npm run earnings`: the Earnings screen as Markdown or JSON, with the same engine and the same cents, plus "what if" scenarios (`--extra-liquid 2000`, `--apy 4.5`, `--plan luxe`), items by hand (`--add "Gym=49.90"`) and your own monthly notices (`--changes --save`). It reads the same data folder as `npm run pull`; without real data it uses the demo.
+- [`AGENTS.md`](AGENTS.md) for coding agents (Claude Code, Codex, Cursor…), with the privacy rules, the red lines and the common changes to make Lighthouse yours. Claude Code also gets the `lighthouse-earnings` skill (`.claude/skills/`).
+- In the app, **Earnings → Take it to your AI** copies the month's sum as text for a chat AI. Pasting shares those numbers with that service.
+
 ## Deploy
 
 The build is a static site (`npm run build` → `dist/`). The demo and the import of your files (or of the synthetic ones) work on any static host.
@@ -160,9 +171,10 @@ npm run build      # tsc + vite build (dist/)
 npm run preview    # serves dist/
 npm run typecheck  # tsc, strict
 npm run lint       # ESLint: React hooks rules are errors, the rest are warnings
-npm run check      # the 9 check scripts, in sequence; fails if any of them fails
+npm run check      # the 10 check scripts, in sequence; fails if any of them fails
 npm run privacy    # compares everything publishable (and dist/) with your real data; skips if there is none
 npm run pull       # downloads your whole account from the connector (opens ether.fi's approval)
+npm run earnings   # the Earnings screen as text for you and your AI (--json, --extra-liquid, --apy, --changes --save; --help)
 node scripts/gen-demo.mjs     # regenerates the demo dataset (deterministic)
 node scripts/gen-sample.mjs   # regenerates fixtures/sample/ (deterministic)
 ```
@@ -179,6 +191,7 @@ node scripts/gen-sample.mjs   # regenerates fixtures/sample/ (deterministic)
 | `check-sample` | the connector boundary with `fixtures/sample/`: pages, repeated rows, string amounts, refunds, voids, declines, currencies, `incomplete`, the AI files and the local merchant rules |
 | `check-portfolio` | Portfolio states end to end: no deposit, empty wallet, failed tool, missing file, unlisted assets, balance without trading positions, stablecoin only, recent FX and the demo |
 | `check-insights` | the AI Insights engine: credit and yield math, the PTAX series, the period summary, savings rules and cards; the red lines (no advice, no IOF, every card with a "why?", estimates marked) |
+| `check-earnings` | the Earnings engine: yield per Liquid vault, cashback by the plan's monthly bands, the rate observed in claims (and when it can't be measured honestly), spend base, manual items, allocation, the milestone ladder and the 50/75/100% amounts (applied as a scenario, they really cover); "what changed" and its thresholds, the text for your AI, `npm run earnings` and `docs/ai/earnings.md` against the code; the red lines (no advice, no "spend more" or plan-level milestone) |
 | `check-security` | red-team regressions: deposit QR/copy trust, links only over https, `.ics` field injection, merchant-rule regexes, amount parsing, rewards and card status |
 
 The checks never print real values. With your data present, they only assert invariants.
@@ -188,7 +201,7 @@ The checks never print real values. With your data present, they only assert inv
 ## Privacy and security
 
 - No server, no telemetry, no third-party analytics, no third-party fonts.
-- The sign-in, your answers and remembered files stay in this browser, under `lighthouse:v1:*` (localStorage and sessionStorage) and the IndexedDB `lighthouse-v1`. Older keys migrate by themselves, once. **Forget everything in this browser** (Portfolio → Connection) erases them all except the language.
+- The sign-in, your answers, your Earnings choices (items added by hand, exclusions, order, rate), the last Earnings snapshot you saw and remembered files stay in this browser, under `lighthouse:v1:*` (localStorage and sessionStorage) and the IndexedDB `lighthouse-v1`. Older keys migrate by themselves, once. **Forget everything in this browser** (Portfolio → Connection) erases them all except the language.
 - Disconnecting erases only the local sign-in: ether.fi has no revocation endpoint. To revoke access for good, use *Settings → AI Connections* in the ether.fi app.
 - Scopes: `transactions:read`, `cards:read`, `balances:read`. Everything is read-only, with no write path: the connector cannot move money, change cards or read card numbers.
 - The AI files come from your own AI and are treated as untrusted: every field is validated, links are checked, and what they say is shown as coming from your AI. Generate them in a session that can't send anything: see [`docs/ai-prompts.md`](docs/ai-prompts.md).
@@ -204,9 +217,11 @@ src/
                  analytics, history, subscriptions), formats (types, subscriptionTypes, validate), storage, demo/
   state/         store (demo | live | imported | fixtures), locale, attention, decisions
   components/    UI, SVG charts, alerts, activity row, subscription and portfolio parts
-  views/         Portfolio (+ Account: Cards, Deposit, Connect), Spending (+ Evolution, Trips), History, Subscriptions, Transactions
+  views/         Portfolio (+ Account: Cards, Deposit, Connect), Spending (+ Evolution, Trips), History, Subscriptions, Earnings, Transactions
 scripts/         pull-history, data-dir, gen-demo, gen-sample, check-*.mts, check-all, privacy-scan
+docs/ai/         for your own AI: the Earnings math, ready-made analyses, public sources
 docs/            ai-prompts (the request for your own AI), RELEASING
+AGENTS.md        for coding agents (CLAUDE.md points to it; the Claude Code skill is in .claude/skills/)
 fixtures/sample/ synthetic connector responses and AI files (versioned)
 fixtures/live/   your data from npm run pull, if you have no ~/lighthouse-data (git-ignored)
 ```

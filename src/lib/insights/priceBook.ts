@@ -81,9 +81,10 @@ const NETFLIX_BR = official('Netflix · Planos e preços (BR)', 'https://help.ne
 const DISNEY_BR = official('Disney+ (BR)', 'https://www.disneyplus.com/pt-br');
 const HBOMAX_BR = official('HBO Max (BR)', 'https://www.hbomax.com/br/pt');
 const M365_BR = official('Microsoft 365 · Comparar planos (BR)', 'https://www.microsoft.com/pt-br/microsoft-365/buy/compare-all-microsoft-365-products');
-const CLAUDE_WEB = official('Claude · Pricing', 'https://claude.com/pricing');
-const CLAUDE_IOS_BR = official('App Store (BR) · Claude', 'https://apps.apple.com/br/app/claude-by-anthropic/id6473753684');
-const CLAUDE_IOS_US = official('App Store (US) · Claude', 'https://apps.apple.com/us/app/claude-by-anthropic/id6473753684');
+// os três reconferidos em 01/11/2026 (pesquisa-ganhos): preços iguais, planos da loja renomeados para Max e Ultra
+const CLAUDE_WEB = official('Claude · Pricing', 'https://claude.com/pricing', '2026-11-01');
+const CLAUDE_IOS_BR = official('App Store (BR) · Claude', 'https://apps.apple.com/br/app/claude-by-anthropic/id6473753684', '2026-11-01');
+const CLAUDE_IOS_US = official('App Store (US) · Claude', 'https://apps.apple.com/us/app/claude-by-anthropic/id6473753684', '2026-11-01');
 const YOUTUBE_IOS_BR = official('App Store (BR) · YouTube', 'https://apps.apple.com/br/app/youtube/id544007664');
 const GOOGLE_ONE_BR = official('Google One · Planos', 'https://one.google.com/about/plans');
 const APPLE_ONE_BR = official('Apple One (BR)', 'https://www.apple.com/br/apple-one/');
@@ -99,6 +100,22 @@ const M365_US = official('Microsoft 365 · Compare plans (US)', 'https://www.mic
 const YOUTUBE_IOS_US = official('App Store (US) · YouTube', 'https://apps.apple.com/us/app/youtube/id544007664');
 const APPLE_ONE_US = official('Apple One (US)', 'https://www.apple.com/apple-one/');
 const UBER_ONE_US = official('Uber One (US)', 'https://www.uber.com/us/en/u/uber-one/');
+// v2 da tela Ganhos (pesquisa-ganhos, 01/11/2026): as mensais caras do dia a dia de quem cria, nos EUA
+const CHECKED_V2 = '2026-11-01';
+const CLAUDE_WEB_V2 = official('Claude · Pricing', 'https://claude.com/pricing', CHECKED_V2);
+const HIGGSFIELD = official('Higgsfield · Pricing', 'https://higgsfield.ai/pricing', CHECKED_V2);
+const ELEVENLABS = official('ElevenLabs · Pricing', 'https://elevenlabs.io/pricing', CHECKED_V2);
+// a página do YouTube mostra o preço pelo país de quem abre, sem o país no endereço: o preço direto dos EUA é da imprensa
+const YOUTUBE_US_PRESS: PriceSource = {
+  label: '9to5Google · YouTube Premium US price hike',
+  url: 'https://9to5google.com/2026/04/10/youtube-premium-us-price-hike/',
+  checked: CHECKED_V2, level: 'press', published: '2026-04-10',
+};
+const MIDJOURNEY = official('Midjourney · Comparing plans', 'https://docs.midjourney.com/hc/en-us/articles/27870484040333-Comparing-Midjourney-Plans', CHECKED_V2);
+// runwayml.com/pricing redireciona para runway.com/pricing
+const RUNWAY = official('Runway · Pricing', 'https://runway.com/pricing', CHECKED_V2);
+const PELOTON_US = official('Peloton App · Membership (US)', 'https://www.onepeloton.com/app-membership', CHECKED_V2);
+const PRIME_US = official('Amazon Prime (US)', 'https://www.amazon.com/amazonprime', CHECKED_V2);
 const NO_TAX: LocalizedText = { en: 'Prices exclude applicable tax.', pt: 'Preços sem os impostos aplicáveis.' };
 const SHARE_FIVE: LocalizedText = { en: 'Share with up to five other people.', pt: 'Compartilhe com até cinco pessoas.' };
 const NETFLIX_EXTRA: LocalizedText = { en: 'Add-on to the Standard (1) or Premium (up to 2) plan.', pt: 'Adicional do plano Padrão (1) ou Premium (até 2).' };
@@ -256,13 +273,15 @@ export const PRICE_BOOK: PriceEntry[] = [
     terms: [{ months: 12, total: 1299.9, billing: 'upfront' }],
     source: CLAUDE_IOS_BR,
   }),
+  // em 01/11/2026 as duas lojas chamam os planos acima do Pro de "Claude Max" e "Claude Ultra" (antes Max 5x e Max
+  // 20x), com os mesmos preços; os ids max e ultra são os mesmos do site (v2, mais abaixo), para o cartão de canal
   entry({
-    service: 'claude-anthropic', serviceName: 'Claude', plan: 'max-5x', planName: 'Max 5x', seats: 1,
+    service: 'claude-anthropic', serviceName: 'Claude', plan: 'max', planName: 'Max', seats: 1,
     country: 'BR', currency: 'BRL', channel: 'app_store', monthly: 799.9,
     source: CLAUDE_IOS_BR,
   }),
   entry({
-    service: 'claude-anthropic', serviceName: 'Claude', plan: 'max-20x', planName: 'Max 20x', seats: 1,
+    service: 'claude-anthropic', serviceName: 'Claude', plan: 'ultra', planName: 'Ultra', seats: 1,
     country: 'BR', currency: 'BRL', channel: 'app_store', monthly: 1499.9,
     source: CLAUDE_IOS_BR,
   }),
@@ -274,12 +293,12 @@ export const PRICE_BOOK: PriceEntry[] = [
     source: CLAUDE_IOS_US,
   }),
   entry({
-    service: 'claude-anthropic', serviceName: 'Claude', plan: 'max-5x', planName: 'Max 5x', seats: 1,
+    service: 'claude-anthropic', serviceName: 'Claude', plan: 'max', planName: 'Max', seats: 1,
     country: 'US', currency: 'USD', channel: 'app_store', monthly: 124.99,
     source: CLAUDE_IOS_US,
   }),
   entry({
-    service: 'claude-anthropic', serviceName: 'Claude', plan: 'max-20x', planName: 'Max 20x', seats: 1,
+    service: 'claude-anthropic', serviceName: 'Claude', plan: 'ultra', planName: 'Ultra', seats: 1,
     country: 'US', currency: 'USD', channel: 'app_store', monthly: 249.99,
     source: CLAUDE_IOS_US,
   }),
@@ -494,6 +513,115 @@ export const PRICE_BOOK: PriceEntry[] = [
   entry({
     service: 'apple', serviceName: 'Apple One', plan: 'apple-one-premier', planName: 'Apple One Premier', seats: 6,
     country: 'US', currency: 'USD', channel: 'direct', monthly: 39.95, note: SHARE_FIVE, source: APPLE_ONE_US,
+  }),
+
+  // ---------- v2 da tela Ganhos (pesquisa-ganhos, 01/11/2026) ----------
+  // Claude no site: acima do Pro, "Max" (5× o uso do Pro) e "Ultra" (10× por semana, sem o limite de 5 h), só mensal
+  // (a página não lista anual para eles). Os mesmos ids dos planos da loja (acima)
+  entry({
+    service: 'claude-anthropic', serviceName: 'Claude', plan: 'max', planName: 'Max', seats: 1,
+    country: 'US', currency: 'USD', channel: 'direct', monthly: 100, note: NO_TAX, source: CLAUDE_WEB_V2,
+  }),
+  entry({
+    service: 'claude-anthropic', serviceName: 'Claude', plan: 'ultra', planName: 'Ultra', seats: 1,
+    country: 'US', currency: 'USD', channel: 'direct', monthly: 200, note: NO_TAX, source: CLAUDE_WEB_V2,
+  }),
+  // Higgsfield: anual = mensal equivalente × 12, cobrado de uma vez. O Ultra tem seletor de créditos; US$ 129 é o de 3.000
+  entry({
+    service: 'higgsfield', serviceName: 'Higgsfield', plan: 'starter', planName: 'Starter',
+    country: 'US', currency: 'USD', channel: 'direct', monthly: 15,
+    terms: [{ months: 12, total: 180, billing: 'upfront' }], note: { en: 'Prices exclude VAT and local taxes.', pt: 'Preços sem IVA e impostos locais.' }, source: HIGGSFIELD,
+  }),
+  entry({
+    service: 'higgsfield', serviceName: 'Higgsfield', plan: 'plus', planName: 'Plus',
+    country: 'US', currency: 'USD', channel: 'direct', monthly: 49,
+    terms: [{ months: 12, total: 468, billing: 'upfront' }], note: { en: 'Prices exclude VAT and local taxes.', pt: 'Preços sem IVA e impostos locais.' }, source: HIGGSFIELD,
+  }),
+  entry({
+    service: 'higgsfield', serviceName: 'Higgsfield', plan: 'ultra', planName: 'Ultra · 3,000 credits',
+    country: 'US', currency: 'USD', channel: 'direct', monthly: 129,
+    terms: [{ months: 12, total: 1188, billing: 'upfront' }], note: { en: 'Prices exclude VAT and local taxes.', pt: 'Preços sem IVA e impostos locais.' }, source: HIGGSFIELD,
+  }),
+  // ElevenLabs: anual = mensal × 10 (FAQ da página); o primeiro mês do Starter e do Creator tem desconto, vale o recorrente
+  entry({
+    service: 'elevenlabs', serviceName: 'ElevenLabs', plan: 'starter', planName: 'Starter', seats: 1,
+    country: 'US', currency: 'USD', channel: 'direct', monthly: 6, terms: [{ months: 12, total: 60, billing: 'upfront' }], source: ELEVENLABS,
+  }),
+  entry({
+    service: 'elevenlabs', serviceName: 'ElevenLabs', plan: 'creator', planName: 'Creator', seats: 1,
+    country: 'US', currency: 'USD', channel: 'direct', monthly: 22, terms: [{ months: 12, total: 220, billing: 'upfront' }], source: ELEVENLABS,
+  }),
+  entry({
+    service: 'elevenlabs', serviceName: 'ElevenLabs', plan: 'pro', planName: 'Pro', seats: 1,
+    country: 'US', currency: 'USD', channel: 'direct', monthly: 99, terms: [{ months: 12, total: 990, billing: 'upfront' }], source: ELEVENLABS,
+  }),
+  entry({
+    service: 'elevenlabs', serviceName: 'ElevenLabs', plan: 'scale', planName: 'Scale', seats: 3,
+    country: 'US', currency: 'USD', channel: 'direct', monthly: 299, terms: [{ months: 12, total: 2990, billing: 'upfront' }], source: ELEVENLABS,
+  }),
+  entry({
+    service: 'elevenlabs', serviceName: 'ElevenLabs', plan: 'business', planName: 'Business', seats: 10,
+    country: 'US', currency: 'USD', channel: 'direct', monthly: 990, terms: [{ months: 12, total: 9900, billing: 'upfront' }], source: ELEVENLABS,
+  }),
+  // YouTube Premium direto (EUA), pela imprensa: novos assinantes desde 10/04/2026; o anual é o do Individual
+  entry({
+    service: 'youtube', serviceName: 'YouTube', plan: 'premium', planName: 'YouTube Premium',
+    country: 'US', currency: 'USD', channel: 'direct', monthly: 15.99, terms: [{ months: 12, total: 159.99, billing: 'upfront' }], source: YOUTUBE_US_PRESS,
+  }),
+  entry({
+    service: 'youtube', serviceName: 'YouTube', plan: 'family', planName: { en: 'YouTube Premium Family', pt: 'YouTube Premium Família' },
+    country: 'US', currency: 'USD', channel: 'direct', monthly: 26.99, source: YOUTUBE_US_PRESS,
+  }),
+  entry({
+    service: 'youtube', serviceName: 'YouTube', plan: 'lite', planName: 'Premium Lite',
+    country: 'US', currency: 'USD', channel: 'direct', monthly: 8.99, source: YOUTUBE_US_PRESS,
+  }),
+  entry({
+    service: 'midjourney', serviceName: 'Midjourney', plan: 'basic', planName: 'Basic',
+    country: 'US', currency: 'USD', channel: 'direct', monthly: 10, terms: [{ months: 12, total: 96, billing: 'upfront' }], source: MIDJOURNEY,
+  }),
+  entry({
+    service: 'midjourney', serviceName: 'Midjourney', plan: 'standard', planName: 'Standard',
+    country: 'US', currency: 'USD', channel: 'direct', monthly: 30, terms: [{ months: 12, total: 288, billing: 'upfront' }], source: MIDJOURNEY,
+  }),
+  entry({
+    service: 'midjourney', serviceName: 'Midjourney', plan: 'pro', planName: 'Pro',
+    country: 'US', currency: 'USD', channel: 'direct', monthly: 60, terms: [{ months: 12, total: 576, billing: 'upfront' }], source: MIDJOURNEY,
+  }),
+  entry({
+    service: 'midjourney', serviceName: 'Midjourney', plan: 'mega', planName: 'Mega',
+    country: 'US', currency: 'USD', channel: 'direct', monthly: 120, terms: [{ months: 12, total: 1152, billing: 'upfront' }], source: MIDJOURNEY,
+  }),
+  entry({
+    service: 'runway', serviceName: 'Runway', plan: 'standard', planName: 'Standard',
+    country: 'US', currency: 'USD', channel: 'direct', monthly: 15, terms: [{ months: 12, total: 144, billing: 'upfront' }], source: RUNWAY,
+  }),
+  entry({
+    service: 'runway', serviceName: 'Runway', plan: 'pro', planName: 'Pro',
+    country: 'US', currency: 'USD', channel: 'direct', monthly: 35, terms: [{ months: 12, total: 336, billing: 'upfront' }], source: RUNWAY,
+  }),
+  entry({
+    service: 'runway', serviceName: 'Runway', plan: 'max', planName: 'Max',
+    country: 'US', currency: 'USD', channel: 'direct', monthly: 95, terms: [{ months: 12, total: 912, billing: 'upfront' }], source: RUNWAY,
+  }),
+  // Peloton: a página diz "Save up to $58" no anual, sem o valor de cada plano: fica sem terms
+  entry({
+    service: 'peloton', serviceName: 'Peloton', plan: 'app-one', planName: 'Peloton App One',
+    country: 'US', currency: 'USD', channel: 'direct', monthly: 12.99, source: PELOTON_US,
+  }),
+  entry({
+    service: 'peloton', serviceName: 'Peloton', plan: 'app-plus', planName: 'Peloton App+',
+    country: 'US', currency: 'USD', channel: 'direct', monthly: 28.99, source: PELOTON_US,
+  }),
+  entry({
+    service: 'peloton', serviceName: 'Peloton', plan: 'all-access', planName: 'Peloton All-Access',
+    country: 'US', currency: 'USD', channel: 'direct', monthly: 49.99,
+    note: { en: 'For Peloton equipment owners.', pt: 'Para quem tem equipamento Peloton.' }, source: PELOTON_US,
+  }),
+  entry({
+    service: 'amazon-prime', serviceName: 'Amazon Prime', plan: 'prime', planName: 'Prime',
+    country: 'US', currency: 'USD', channel: 'direct', monthly: 14.99,
+    terms: [{ months: 12, total: 139, billing: 'upfront' }], note: { en: 'Plus tax.', pt: 'Mais impostos.' }, source: PRIME_US,
   }),
 ];
 

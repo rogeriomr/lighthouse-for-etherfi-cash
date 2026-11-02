@@ -44,9 +44,9 @@ const demo = enrichDataset(demoDataset);
 const subs = detectSubscriptions(demo);
 const w30 = periodWindow(demo, '30d');
 const s30 = spendSummary(demo, subs, w30.from, w30.to);
-check('total 30d', s30.total === 3425.38, String(s30.total));
+check('total 30d', s30.total === 3613.77, String(s30.total));
 check('compras 30d', s30.count === 90, String(s30.count));
-check('assinaturas / avulsas / dia a dia', s30.buckets.subscriptions === 157.94 && s30.buckets.oneOffs === 412 && s30.buckets.everyday === 2855.44, JSON.stringify(s30.buckets));
+check('assinaturas / avulsas / dia a dia', s30.buckets.subscriptions === 608.93 && s30.buckets.oneOffs === 412 && s30.buckets.everyday === 2592.84, JSON.stringify(s30.buckets));
 check('moeda da casa', demo.homeCurrency === 'USD', demo.homeCurrency);
 const trips = detectTrips(demo);
 check('3 viagens: Tóquio, Londres e Paris, Cidade do México', trips.map((t) => `${t.cities.join('>')}=${t.total}`).join(', ') === 'Tokyo=2841.44, London>Paris=3047.6, Mexico City=917.53',

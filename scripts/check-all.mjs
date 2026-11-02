@@ -3,7 +3,7 @@
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
-const CHECKS = ['pipeline', 'history', 'subscriptions', 'demo', 'anomalies', 'sample', 'portfolio', 'insights', 'security'];
+const CHECKS = ['pipeline', 'history', 'subscriptions', 'demo', 'anomalies', 'sample', 'portfolio', 'insights', 'earnings', 'security'];
 
 const [major, minor] = process.versions.node.split('.').map(Number);
 if (major < 22 || (major === 22 && minor < 6)) {

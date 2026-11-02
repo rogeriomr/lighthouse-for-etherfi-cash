@@ -26,7 +26,8 @@
     "check": "node scripts/check-all.mjs",
     "test": "node scripts/check-all.mjs",
     "privacy": "node scripts/privacy-scan.mjs",
-    "pull": "node scripts/pull-history.mjs"
+    "pull": "node scripts/pull-history.mjs",
+    "earnings": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/earnings.mts"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",

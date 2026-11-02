@@ -17,6 +17,10 @@ export const KEYS = {
   oauthPending: 'oauth-pending',
   /** a pessoa pediu para lembrar os arquivos importados (os dados em si ficam no IndexedDB) */
   importRemember: 'import-remember',
+  /** tela Ganhos: taxa escolhida, base, itens digitados à mão, exclusões e ordem (lib/earnings.ts, validateEarningsPrefs) */
+  earnings: 'earnings-prefs',
+  /** tela Ganhos: a última foto vista, uma para o demo e uma para os dados reais (lib/earningsChanges.ts, "o que mudou") */
+  earningsSeen: 'earnings-seen',
 } as const;
 
 /**

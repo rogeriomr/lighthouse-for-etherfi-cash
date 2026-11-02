@@ -1,4 +1,5 @@
 import { useEffect, useId, useState } from 'react';
+import type { ReactNode } from 'react';
 import { ArrowRight, Inbox, Info, Receipt } from 'lucide-react';
 import { approxHome, cashbackSummary, fxSummary, periodWindow, rewardsSummary, spendSummary } from '../lib/analytics';
 import type { PartialReason, PortfolioClass, PortfolioSummary, RecentFx } from '../lib/analytics';
@@ -406,7 +407,7 @@ export function AssetsByClass({ s }: { s: PortfolioSummary }) {
  * Rendendo, poder de compra e emprestado: três números à parte, nenhum somado ao saldo. O poder de compra é o da fonte
  * (availableBalance), não limite − emprestado. Sem limite de crédito, a parte de crédito some.
  */
-export function EarningCredit({ s }: { s: PortfolioSummary }) {
+export function EarningCredit({ s, shortcut }: { s: PortfolioSummary; shortcut?: ReactNode }) {
   const tr = useTr();
   const y = s.yield;
   const credit = s.creditLimit > 0;
@@ -445,6 +446,8 @@ export function EarningCredit({ s }: { s: PortfolioSummary }) {
           ) : (
             <dd className="mt-1 text-sm text-muted">{tr('No asset reports an APY.', 'Nenhum ativo informa APY.')}</dd>
           )}
+          {/* o atalho para a tela Ganhos (rendimento + cashback contra as recorrências); some quando não há o que cobrir */}
+          {shortcut}
         </div>
         {s.spendingPower !== null ? (
           <div className="py-4">

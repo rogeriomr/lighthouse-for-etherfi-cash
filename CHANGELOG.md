@@ -4,6 +4,28 @@ All notable changes to this project. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Added
+
+- **Earnings** (`#/earnings`): what your estimated earnings pay for among your recurring costs. Yield per Liquid vault (and other assets with an APY) plus the expected card cashback flow into your subscriptions and recurring bills, cheapest first or in your own order, each paid in full or in part.
+  - **The month's sum, as a receipt:** each subscription with its cost and the cashback it earns, then the cashback from the rest of your card spending, then what you hold in Liquid and what it yields a month, adding up to your monthly earnings and how many subscriptions they already pay. The shown cents always add up.
+  - **Cashback:** follows the public monthly bands of your ether.fi Cash plan (Core by default; source and date on screen). The rate observed in your claims is shown for comparison, and you can use your own rate.
+  - **Manual items:** add recurring costs by hand, saved in this browser only.
+  - **Milestones:** a static, informative ladder of how much more earning in Liquid would also cover the next items, at today's APY. Every figure is labelled as an estimate, never as a recommendation.
+  - **Shortcuts:** from Portfolio and from the monthly cost on Subscriptions.
+  - **The summary comes first:** the screen opens with your monthly earnings, where they come from, the coverage bar (point at or tap a block to see what it pays) and how much in Liquid would cover 50%, 75% and 100% of your recurring costs at today's APY, one card per target. The itemised receipt follows below.
+  - **Since your last visit:** what changed in your earnings (an item now covered or no longer covered, a new recurring charge, a price, an APY, the total, the next milestone), with a "what if" line from the milestones. The Earnings menu item gets a dot when there's something new. The last snapshot seen stays in this browser (`lighthouse:v1:earnings-seen`).
+  - **Take it to your AI:** copies the month's sum as text (items, cashback, Liquid, the 50/75/100% amounts, milestones, assumptions and rules for the AI) to paste into the AI you use.
+- **Portfolio** now opens with what your earnings pay, right under the balance: monthly earnings, where they come from, the coverage bar and the 50/75/100% amounts. Point at or tap a block of the bar to see the item, its cost and how much of it is paid (also on Earnings, and by keyboard).
+- **Your AI:** `docs/ai/` (how Earnings is worked out, ready-made analyses, public sources and APIs), `AGENTS.md` for coding agents, with a `CLAUDE.md` pointing to it and a `lighthouse-earnings` skill for Claude Code in `.claude/skills/`.
+- `npm run earnings`: the Earnings screen as Markdown or JSON, with the same engine and cents, "what if" scenarios (`--extra-liquid`, `--apy`, `--plan`), items by hand (`--add`), exclusions and monthly notices (`--changes --save`, a snapshot in the data folder).
+- The phone bottom bar now has five items (Portfolio, Spending, Subscriptions, Earnings, More). **More** opens a sheet with History, Activity, AI Insights and the guide.
+- `check-earnings`: the Earnings math, with fixed demo targets and invariants on your real data. It also applies every milestone and every 50/75/100% amount as a scenario and checks that it really covers, and checks "what changed", the text for your AI, `npm run earnings` and `docs/ai/earnings.md` against the code.
+
+### Changed
+
+- Demo cashback claims are paid in ETHFI, as in the real programme.
+- The demo has more everyday monthly subscriptions at today's public US prices (Claude Ultra, Higgsfield Ultra, ElevenLabs Pro, Midjourney Standard, Peloton App One), with sources in the price book. The screenshots in `docs/screenshots` were retaken.
+
 ### Security
 
 - Raised the Node.js baseline to 22.23.4 (CI also covers 24.22.1; the 26.x line starts at 26.12.1) for the October 2026 security releases. No application code changed.

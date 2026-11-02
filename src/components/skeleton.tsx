@@ -59,6 +59,27 @@ const SHAPES: Record<View, () => ReactNode> = {
   ),
   history: () => <Kpis chart />,
   subscriptions: () => <Kpis list />,
+  // Ganhos: a frase do topo com a alternância, o medidor, o fluxo com as fontes ao lado e a lista com os marcos
+  earnings: () => (
+    <>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="w-full max-w-2xl space-y-3">
+          <Bone className="h-4 w-24 rounded-md" />
+          <Bone className="h-10 w-full rounded-lg sm:h-12" />
+        </div>
+        <Bone className="h-11 w-full rounded-lg min-[360px]:w-48" />
+      </div>
+      <Bone className="h-28" />
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+        <Bone className="h-80 lg:col-span-7" />
+        <Bone className="h-80 lg:col-span-5" />
+      </div>
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+        <Bone className="h-96 lg:col-span-7" />
+        <Bone className="h-64 lg:col-span-5" />
+      </div>
+    </>
+  ),
   statement: () => (
     <>
       <Title />
@@ -131,7 +152,7 @@ export function ShellSkeleton({ label }: { label?: string }) {
         </div>
         <div className="mx-4 mb-3 h-3 w-60 max-w-[70%] rounded bg-panel2/60 sm:mx-5 lg:mt-2" />
         <div className="hidden space-y-2 px-3 lg:block">
-          {[0, 1, 2, 3, 4, 5].map((i) => <div key={i} className="h-9 rounded-lg bg-panel2/40" />)}
+          {[0, 1, 2, 3, 4, 5, 6].map((i) => <div key={i} className="h-9 rounded-lg bg-panel2/40" />)}
         </div>
       </div>
       <div className="min-w-0 flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] short:pb-[calc(3.75rem+env(safe-area-inset-bottom))] lg:pb-0">
@@ -142,12 +163,12 @@ export function ShellSkeleton({ label }: { label?: string }) {
           <ScreenSkeleton view={view} label={label} />
         </div>
       </div>
-      {/* a barra inferior do celular, no mesmo lugar e altura */}
+      {/* a barra inferior do celular (4 telas e o "Mais"), no mesmo lugar e altura */}
       <div
         aria-hidden
-        className="fixed inset-x-0 bottom-0 grid grid-cols-6 border-t border-line bg-bg/95 pt-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] lg:hidden"
+        className="fixed inset-x-0 bottom-0 grid grid-cols-5 border-t border-line bg-bg/95 pt-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] lg:hidden"
       >
-        {[0, 1, 2, 3, 4, 5].map((i) => (
+        {[0, 1, 2, 3, 4].map((i) => (
           // as mesmas medidas do NavButton (ícone de 20px, rótulo com linha de 16px, py-1.5): a barra não salta na troca
           <div key={i} className="flex min-h-12 flex-col items-center justify-center gap-1 py-1.5 short:min-h-11 short:flex-row short:gap-4 short:py-1">
             <div className="size-5 rounded bg-panel2/70" />

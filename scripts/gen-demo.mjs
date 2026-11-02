@@ -4,7 +4,8 @@
 //
 // O que o demo existe para mostrar: US$ 25.561,00 na conta, com as 5 classes de ativo e crédito em uso; empréstimos e
 // pagamentos; depósitos, saques, trocas, pontes, aplicações no rendimento, resgates de cashback e indicações; 3 cartões
-// (um congelado); 3 viagens (MXN, GBP/EUR, JPY) com um caso de DCC provável; 13 assinaturas ativas, mensais e anuais:
+// (um congelado); 3 viagens (MXN, GBP/EUR, JPY) com um caso de DCC provável; 17 assinaturas ativas, mensais e anuais,
+// com as caras de quem cria (Claude Ultra, ElevenLabs, Higgsfield, Midjourney) e o Peloton, para a tela Ganhos:
 // um aumento, uma anual que renovou hoje sem aviso (risco alto), uma anual cara que renova em 3 semanas sem aviso, uma
 // que renova em 2 dias, um teste grátis que virou cobrança, uma sobreposição e um clube; uma que parou com email de
 // cancelamento e uma que parou sem email ("possivelmente cancelada"); arquivos da IA (email, pesquisa e auditoria); o
@@ -28,10 +29,18 @@ const PRICE = {
   netflixNew: 19.99,
   spotifyOld: 11.99,
   spotifyNew: 12.99,
-  claudePro: 20,
+  // Claude no plano mais alto do site dos EUA (Ultra, US$ 200; acima do Pro há Max e Ultra): o demo tem as assinaturas
+  // caras do dia a dia de quem cria
+  claudeUltra: 200,
   chatgptPlus: 20,
   youtubeIos: 20.99,
   uberOne: 9.99,
+  // mensais do dia a dia, preço público dos EUA no site (priceBook, conferido em 01/11/2026). Nenhum par serviço + valor
+  // coincide com uma cobrança real: conferido contra os dados reais, e o npm run privacy confere de novo
+  elevenlabsPro: 99,
+  higgsfieldUltra: 129,
+  midjourneyStandard: 30,
+  pelotonAppOne: 12.99,
 };
 
 // ---------- relógio determinístico ----------
@@ -105,7 +114,13 @@ const SUBS = [
   ['Spotify Premium', 'Subscriptions', PRICE.spotifyOld, 23, '2025-07', '2026-01', onlineCard],
   ['Spotify Premium', 'Subscriptions', PRICE.spotifyNew, 23, '2026-02', '2026-09', onlineCard],
   ['iCloud+', 'Subscriptions', 2.99, 5, '2025-07', '2026-10', onlineCard],
-  ['Claude.ai', 'Subscriptions', PRICE.claudePro, 14, '2025-09', '2026-09', onlineCard],
+  ['Claude.ai', 'Subscriptions', PRICE.claudeUltra, 14, '2025-09', '2026-09', onlineCard],
+  // as caras de quem cria e uma do dia a dia, todas mensais, cobradas entre os dias 3 e 9 (a renovação fica a mais de
+  // 2 semanas: nenhum aviso novo no Início)
+  ['ElevenLabs', 'Subscriptions', PRICE.elevenlabsPro, 6, '2026-01', '2026-10', onlineCard],
+  ['Higgsfield', 'Subscriptions', PRICE.higgsfieldUltra, 3, '2026-04', '2026-10', onlineCard],
+  ['Midjourney Inc', 'Subscriptions', PRICE.midjourneyStandard, 9, '2025-11', '2026-10', onlineCard],
+  ['Peloton', 'Subscriptions', PRICE.pelotonAppOne, 7, '2026-02', '2026-10', onlineCard],
   ['ChatGPT Plus', 'Subscriptions', PRICE.chatgptPlus, 2, '2026-02', '2026-10', onlineCard],
   ['YouTube Premium', 'Subscriptions', PRICE.youtubeIos, 18, '2026-01', '2026-09', onlineCard],
   ['Uber One', 'Subscriptions', PRICE.uberOne, 15, '2026-01', '2026-09', onlineCard],
@@ -357,11 +372,11 @@ add('repayment', 'settled', '2026-10-02', { merchant: 'Repayment', amount: 500 }
 // recompensas: o resgate do cashback no fim de cada mês (1,5% do gasto do mês), o de outubro ainda a confirmar
 for (const ym of MONTHS.slice(0, -1)) {
   const last = new Date(Date.UTC(Number(ym.slice(0, 4)), Number(ym.slice(5, 7)), 0)).getUTCDate();
-  const claim = add('cashback_claim', 'settled', `${ym}-${pad(last)}`, { amount: R2(monthTotal(ym) * 0.015), token: 'USDC', h0: 18, h1: 20 });
+  const claim = add('cashback_claim', 'settled', `${ym}-${pad(last)}`, { amount: R2(monthTotal(ym) * 0.015), token: 'ETHFI', h0: 18, h1: 20 });
   // a troca que sai junto com um resgate é a perna dele, não dinheiro novo
   if (ym === '2026-08') add('swap', 'settled', '', { amount: claim.amount, token: 'ETHFI', at: minutesAfter(claim.date, 1) });
 }
-add('cashback_claim', 'pending', '2026-10-10', { amount: 9.1, token: 'USDC' });
+add('cashback_claim', 'pending', '2026-10-10', { amount: 9.1, token: 'ETHFI' });
 add('referral', 'settled', '2026-03-15', { amount: 25, token: 'USDC' });
 add('referral', 'pending', '2026-10-09', { amount: 25, token: 'USDC' });
 

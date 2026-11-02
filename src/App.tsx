@@ -1,6 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import type { ComponentType, RefObject } from 'react';
-import { ArrowLeftRight, CalendarClock, CircleAlert, HistoryIcon, PieChart, RefreshCw, Sparkles, Wallet } from 'lucide-react';
+import { ArrowLeftRight, BookOpen, CalendarClock, CircleAlert, Ellipsis, HandCoins, HistoryIcon, PieChart, RefreshCw, Sparkles, Wallet, X } from 'lucide-react';
 import { StoreProvider, useStore } from './state/store';
 import { LocaleProvider, useLocale, useLocaleSwitch, useTr } from './state/locale';
 import { attentionSummary, useAttention, waitingLabel } from './state/attention';
@@ -12,6 +12,7 @@ import { Badge, BrandMark, ExternalLink, Spinner } from './components/ui';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ScreenSkeleton } from './components/skeleton';
 import { useInsightsOn } from './components/insightsPref';
+import { useEarningsNews } from './components/earningsData';
 import { useMedia } from './components/useMedia';
 import { dateRange } from './lib/format';
 import { DEFAULT_VIEW, VIEW_SLUG, viewOfSlug } from './lib/nav';
@@ -43,6 +44,7 @@ const SCREENS = {
   spending: screen(() => import('./views/Spending').then((m) => m.SpendingView)),
   history: screen(() => import('./views/History').then((m) => m.HistoryView)),
   subscriptions: screen(() => import('./views/Subscriptions').then((m) => m.SubscriptionsView)),
+  earnings: screen(() => import('./views/Earnings').then((m) => m.EarningsView)),
   statement: screen(() => import('./views/Transactions').then((m) => m.TransactionsView)),
   insights: screen(() => import('./views/Insights').then((m) => m.InsightsView)),
   start: screen(() => import('./views/Start').then((m) => m.StartView)),
@@ -51,6 +53,7 @@ const PortfolioScreen = SCREENS.portfolio.Screen;
 const SpendingScreen = SCREENS.spending.Screen;
 const HistoryScreen = SCREENS.history.Screen;
 const SubscriptionsScreen = SCREENS.subscriptions.Screen;
+const EarningsScreen = SCREENS.earnings.Screen;
 const TransactionsScreen = SCREENS.statement.Screen;
 const InsightsScreen = SCREENS.insights.Screen;
 const StartScreen = SCREENS.start.Screen;
@@ -61,12 +64,19 @@ const NAV: { id: View; label: [string, string]; short?: [string, string]; icon: 
   { id: 'spending', label: ['Spending', 'Gastos'], icon: PieChart },
   { id: 'history', label: ['History', 'Histórico'], icon: HistoryIcon },
   { id: 'subscriptions', label: ['Subscriptions', 'Assinaturas'], short: ['Subs', 'Assinat.'], icon: CalendarClock },
+  { id: 'earnings', label: ['Earnings', 'Ganhos'], icon: HandCoins },
   { id: 'statement', label: ['Activity', 'Extrato'], icon: ArrowLeftRight },
   // começa desligada: o item fica na navegação com o selo "off", e a tela mostra o convite
   { id: 'insights', label: ['AI Insights', 'AI Insights'], short: ['Insights', 'Insights'], icon: Sparkles },
 ];
 
-/** "Comece aqui" (#/start): fora da barra; chega pelo rodapé, pela faixa do demo e pela Conexão */
+/**
+ * Celular: a barra de baixo leva estes quatro e o "Mais"; o resto da NAV (Histórico, Extrato, AI Insights) e o
+ * "Comece aqui" ficam na folha do "Mais". A ordem segue a da NAV (a da lateral do desktop), só sem os de dentro.
+ */
+const BAR: readonly View[] = ['portfolio', 'spending', 'subscriptions', 'earnings'];
+
+/** "Comece aqui" (#/start): fora da lateral; chega pelo rodapé, pela faixa do demo, pela Conexão e, no celular, pelo "Mais" */
 const START_LABEL: [string, string] = ['Use it with your account', 'Como usar com a sua conta'];
 
 const ACCOUNT_TABS: Record<AccountTab, { slug: string; label: [string, string] }> = {
@@ -434,6 +444,7 @@ function Shell() {
               ) : null}
               {view === 'history' ? <HistoryScreen /> : null}
               {view === 'subscriptions' ? <SubscriptionsScreen target={target} /> : null}
+              {view === 'earnings' ? <EarningsScreen onNavigate={navigate} /> : null}
               {/* o mês e a linha vêm da URL: trocar por link remonta a lista com o filtro novo */}
               {view === 'statement' ? <TransactionsScreen key={`${month ?? 'all'}|${target ?? ''}`} initialMonth={month} target={target} /> : null}
               {view === 'insights' ? <InsightsScreen onNavigate={navigate} /> : null}
@@ -448,13 +459,13 @@ function Shell() {
       </main>
 
       {/*
-        celular: barra inferior fixa com os 6 itens, depois do <main> no DOM (o Tab chega ao conteúdo antes dela) e com
-        respiro para a área segura; deitado (short), ícone e rótulo numa linha só, mais baixa
+        celular: barra inferior fixa com 4 telas e o "Mais", depois do <main> no DOM (o Tab chega ao conteúdo antes dela)
+        e com respiro para a área segura; deitado (short), ícone e rótulo numa linha só, mais baixa
       */}
       {desktop ? null : (
         <nav
           aria-label={tr('Main', 'Principal')}
-          className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-6 border-t border-line bg-bg/95 pt-1 pr-[max(0.125rem,env(safe-area-inset-right))] pb-[max(0.25rem,env(safe-area-inset-bottom))] pl-[max(0.125rem,env(safe-area-inset-left))] backdrop-blur short:pt-0 lg:hidden"
+          className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-line bg-bg/95 pt-1 pr-[max(0.125rem,env(safe-area-inset-right))] pb-[max(0.25rem,env(safe-area-inset-bottom))] pl-[max(0.125rem,env(safe-area-inset-left))] backdrop-blur short:pt-0 lg:hidden"
         >
           {nav('bar')}
         </nav>
@@ -574,11 +585,107 @@ function MainNav({ variant, view, attention, quiet, onNav }: {
   onNav: (id: View) => void;
 }) {
   const current = useTapped() ?? view;
+  const items = variant === 'bar' ? NAV.filter((n) => BAR.includes(n.id)) : NAV;
   return (
     <>
-      {NAV.map((item) => (
+      {items.map((item) => (
         <NavButton key={item.id} variant={variant} item={item} active={current === item.id} attention={attention} quiet={quiet} onClick={() => onNav(item.id)} />
       ))}
+      {variant === 'bar' ? <MoreMenu current={current} attention={attention} quiet={quiet} onNav={onNav} /> : null}
+    </>
+  );
+}
+
+/**
+ * O "Mais" da barra do celular: abre uma folha (dialog modal) com as telas que não cabem na barra e o "Comece aqui".
+ * O foco fica preso nela; Esc, o X ou um toque fora fecham, e o foco volta ao botão. Com uma dessas telas aberta, o
+ * botão aparece como o atual e o leitor de tela ouve qual ("Mais, Histórico").
+ */
+function MoreMenu({ current, attention, quiet, onNav }: { current: View; attention: Attention; quiet: boolean; onNav: (id: View) => void }) {
+  const tr = useTr();
+  const [open, setOpen] = useState(false);
+  const dialog = useRef<HTMLDialogElement>(null);
+  const button = useRef<HTMLButtonElement>(null);
+  // escolheu uma tela: o foco vai para o título dela (o Shell cuida), não de volta para o botão
+  const picked = useRef(false);
+  const items = NAV.filter((n) => !BAR.includes(n.id));
+  const here = items.find((n) => n.id === current);
+  const active = Boolean(here) || current === 'start';
+  useEffect(() => {
+    const d = dialog.current;
+    if (!d) return;
+    if (open && !d.open) d.showModal();
+    else if (!open && d.open) d.close();
+  }, [open]);
+  const pick = (id: View) => {
+    picked.current = true;
+    setOpen(false);
+    onNav(id);
+  };
+  // fechou sem escolher (Esc, X, toque fora): o foco volta ao botão, mesmo quando o toque não o tinha focado (iOS)
+  const closed = () => {
+    setOpen(false);
+    if (!picked.current) button.current?.focus({ preventScroll: true });
+    picked.current = false;
+  };
+  return (
+    <>
+      <button
+        ref={button}
+        type="button"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        onClick={() => setOpen(true)}
+        className={cx(
+          'flex min-h-12 min-w-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg px-0 py-1.5 text-xs transition-colors active:bg-panel2/70 short:min-h-11 short:flex-row short:gap-4 short:py-1',
+          active ? 'text-ink' : 'text-faint hover:text-muted',
+        )}
+      >
+        <Ellipsis aria-hidden className={cx('size-5', active && 'text-accent')} />
+        <span className={cx('max-w-full truncate tracking-tight sm:tracking-normal', active && 'font-medium')}>{tr('More', 'Mais')}</span>
+        {active ? <span className="sr-only">, {here ? tr(...here.label) : tr(...START_LABEL)}</span> : null}
+      </button>
+      <dialog
+        ref={dialog}
+        aria-label={tr('More', 'Mais')}
+        onClose={closed}
+        // toque no fundo escurecido (fora da folha) fecha
+        onClick={(e) => { if (e.target === e.currentTarget) setOpen(false); }}
+        className="fixed inset-x-0 top-auto bottom-0 m-0 max-h-[85dvh] w-full max-w-none overflow-y-auto rounded-t-2xl border border-b-0 border-line bg-panel p-0 text-ink backdrop:bg-black/60"
+      >
+        <div className="px-3 pt-2 pr-[max(0.75rem,env(safe-area-inset-right))] pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-[max(0.75rem,env(safe-area-inset-left))]">
+          <div className="flex items-center justify-between gap-3 pl-3">
+            <h2 className="text-[13px] font-medium uppercase tracking-[0.1em] text-muted">{tr('More', 'Mais')}</h2>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label={tr('Close', 'Fechar')}
+              className="flex size-11 cursor-pointer items-center justify-center rounded-lg text-muted transition-colors hover:bg-panel2 hover:text-ink active:bg-panel2"
+            >
+              <X aria-hidden className="size-5" />
+            </button>
+          </div>
+          {/* sem outro <nav>: a folha já está dentro da navegação principal, com o nome "Mais" */}
+          <div className="mt-1 flex flex-col gap-1">
+            {items.map((item) => (
+              <NavButton key={item.id} variant="side" item={item} active={current === item.id} attention={attention} quiet={quiet} onClick={() => pick(item.id)} />
+            ))}
+            <div aria-hidden className="my-1 border-t border-line" />
+            <button
+              type="button"
+              onClick={() => pick('start')}
+              aria-current={current === 'start' ? 'page' : undefined}
+              className={cx(
+                'flex min-h-11 w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm transition-colors active:bg-panel2',
+                current === 'start' ? 'bg-panel2 text-ink' : 'text-faint hover:bg-panel2/50 hover:text-muted',
+              )}
+            >
+              <BookOpen aria-hidden className={cx('size-4', current === 'start' && 'text-accent')} />
+              <span className={cx(current === 'start' && 'font-medium')}>{tr(...START_LABEL)}</span>
+            </button>
+          </div>
+        </div>
+      </dialog>
     </>
   );
 }
@@ -647,6 +754,7 @@ function NavButton({ item, variant, active, attention, quiet, onClick }: {
             {tr('off', 'desl.')}
           </span>
         ) : null}
+        {item.id === 'earnings' && !side && !active ? <EarningsNewsDot variant="bar" /> : null}
       </span>
       <span className={cx('max-w-full truncate', !side && 'tracking-tight sm:tracking-normal', active && 'font-medium')}>
         {side ? tr(...item.label) : (
@@ -672,7 +780,25 @@ function NavButton({ item, variant, active, attention, quiet, onClick }: {
           <span className="sr-only">, {tr('off', 'desligado')}</span>
         </>
       ) : null}
+      {item.id === 'earnings' && side && !active ? <EarningsNewsDot variant="side" /> : null}
     </button>
+  );
+}
+
+/**
+ * O ponto de novidade no item "Ganhos": algo mudou nos ganhos desde a última visita à tela (cobertura, recorrência
+ * nova, preço, APY, o total ou o próximo marco). Some ao abrir a tela, que grava a foto vista.
+ */
+function EarningsNewsDot({ variant }: { variant: 'side' | 'bar' }) {
+  const tr = useTr();
+  const { changes } = useEarningsNews();
+  if (!changes.length) return null;
+  const label = changes.length === 1 ? tr('1 change since your last visit', '1 novidade desde a sua última visita') : tr(`${changes.length} changes since your last visit`, `${changes.length} novidades desde a sua última visita`);
+  return (
+    <>
+      <span aria-hidden className={cx('size-2 rounded-full bg-accent', variant === 'bar' ? 'absolute -top-0.5 -right-1' : 'ml-auto')} title={label} />
+      <span className="sr-only">, {label}</span>
+    </>
   );
 }
 

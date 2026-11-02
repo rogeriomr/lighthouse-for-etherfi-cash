@@ -18,17 +18,19 @@ A interface abre em **inglês por padrão**. Troque para português no seletor *
 | ![Tela de Gastos do demo num navegador de computador](docs/screenshots/spending-desktop.png) | ![Tela de Gastos do demo num celular](docs/screenshots/spending-mobile.png) |
 | ![Tela de Assinaturas do demo num navegador de computador](docs/screenshots/subscriptions-desktop.png) | ![O guia "Comece aqui" num celular](docs/screenshots/start-mobile.png) |
 | ![Aba AI Insights do demo, ligada, num navegador de computador](docs/screenshots/insights-desktop.png) | |
+| ![Tela de Ganhos do demo num navegador de computador: o que o rendimento e o cashback pagam das assinaturas](docs/screenshots/earnings-desktop.png) | |
 
 <sub>Capturas do demo e do guia "Comece aqui" (`#/start`), em inglês: todos os números e nomes são fictícios.</sub>
 
 ## O que ele faz
 
-Seis telas, cada uma respondendo uma pergunta (no celular, elas ficam numa barra fixa embaixo):
+Sete telas, cada uma respondendo uma pergunta (no celular, as principais ficam numa barra fixa embaixo e o resto em **Mais**):
 
-- **Portfólio** (a primeira tela): o que você tem, numa frase ("Você tem US$ 12.480,55 na ether.fi"), com o valor na sua moeda ao lado ("≈ R$ 68,5 mil"), pelo câmbio das suas compras recentes no cartão e marcado como estimativa. "Como está dividido" mostra a parte de cada tipo de ativo, em % e em dólar: fiat (com a moeda, como "Fiat · USD"), cripto, ações, renda fixa, commodities e outros. Dólar num cofre Liquid conta como fiat, e a lista marca que ele está no cofre. Ao lado: o rendimento estimado, o poder de compra e o que foi emprestado, nunca somados ao total. Uma linha diz quantas coisas esperam você e leva até elas em Gastos. Cartões, depósito (escolha o ativo para ver as redes aceitas) e conexão são abas dessa tela.
+- **Portfólio** (a primeira tela): o que você tem, numa frase ("Você tem US$ 12.480,55 na ether.fi"), com o valor na sua moeda ao lado ("≈ R$ 68,5 mil"), pelo câmbio das suas compras recentes no cartão e marcado como estimativa. "Como está dividido" mostra a parte de cada tipo de ativo, em % e em dólar: fiat (com a moeda, como "Fiat · USD"), cripto, ações, renda fixa, commodities e outros. Dólar num cofre Liquid conta como fiat, e a lista marca que ele está no cofre. Ao lado: o rendimento estimado, o poder de compra e o que foi emprestado, nunca somados ao total. Logo abaixo do saldo, **o que os seus ganhos pagam**: os ganhos estimados por mês, de onde vêm, uma barra com um bloco por recorrência (aponte ou toque num bloco para ver o item, o custo e quanto dele está pago) e quanto no Liquid cobriria 50%, 75% e 100% das recorrências. Uma linha diz quantas coisas esperam você e leva até elas em Gastos. Cartões, depósito (escolha o ativo para ver as redes aceitas) e conexão são abas dessa tela.
 - **Gastos**: só compras no cartão, por categoria e estabelecimento, com a barra de cada dia dividida por categoria e a variação contra o período anterior. "Precisa de atenção" fica perto do topo: renovações para responder ou conferir e cobranças fora do comum, cada uma com o seu "por quê?". Depois vêm o mês a mês, com a explicação de cada salto, e as viagens, quando houver.
 - **Histórico**: todas as compras da conta, mês a mês por categoria, com o que mais se gastou, para quem foi o dinheiro (por marca ou estabelecimento), onde (pela moeda da compra, porque a ether.fi não informa cidade nem país) e quando (dia da semana × hora). Também traz as maiores compras e a lista completa. Tocar num gráfico filtra a lista.
 - **Assinaturas**: o que é assinatura, ciclo, próxima renovação e custo. Avisa 14, 7 e 2 dias antes de cada renovação (e 30 dias antes nas de risco alto), pergunta "vai manter ou cancelar?" a cada ciclo e baixa um calendário (`.ics`) com os lembretes.
+- **Ganhos**: o que o rendimento e o cashback pagam do que se repete todo mês ("Seus ganhos cobrem 10 de 17 assinaturas"), numa conta de somar como um recibo. Cada assinatura mostra o custo e o cashback que gera; depois vêm o cashback delas, o cashback do resto do cartão, cada cofre Liquid com quanto você tem nele e o que rende por mês, e os outros ativos com APY. Tudo soma nos seus ganhos por mês, e os centavos sempre fecham. O cashback é a sua base de gasto no cartão × uma taxa: as taxas públicas do seu plano (Core, se você não escolher outro), com a taxa observada nos seus resgates ao lado, ou uma que você escolhe. Um fluxo mostra as fontes pagando as assinaturas e contas recorrentes, do mais barato ao mais caro ou na ordem que você fixar: cada item pago inteiro (✓) ou em parte, e a sobra. Dá para adicionar itens à mão (aluguel, academia), tirar um item da conta e ver os próximos marcos: quanto a mais rendendo no Liquid cobriria também o próximo item, ao APY de hoje. **Quanto no Liquid cobriria** 50%, 75% e 100% das recorrências fica sempre na tela. **Desde a sua última visita** lista o que mudou (um item que passou a ser coberto ou deixou de ser, uma recorrência nova, um preço, um APY, o total, o próximo marco) com uma linha de "e se", e o item Ganhos do menu ganha um ponto quando há novidade. **Leve para a sua IA** copia a conta do mês em texto para a IA que você usa. Cada número tem um "por quê?" com a conta. É estimativa e cenário, nunca recomendação; as suas escolhas ficam neste navegador.
 - **Extrato**: tudo o que passou pela conta, agrupado por dia e filtrável pelo que o dinheiro fez. Depósito seguido de aplicação no rendimento aparece como um movimento só.
 - **AI Insights** (opcional, começa desligado): os seus números, explicados em cartões. Cobre crédito e rendimento, com um controle para "se o ETH caísse X%", o que os ganhos pagaram, economia e o resumo do período. Cada cartão tem um "por quê?" com a conta, o selo "Calculado aqui" e "Estimativa" quando é o caso. É informação e cenário, não conselho financeiro. Tudo é calculado neste navegador e nada sai dele. Perguntas prontas abrem o Claude em outra aba, só com a pergunta no link e nenhum dado seu; cada uma pede ao Claude que use só o conector da ether.fi, só para ler, e trate nomes de estabelecimento e outros textos dos resultados como dados, nunca como instruções. Liga e desliga na própria aba; a escolha fica salva só neste navegador.
 
@@ -134,6 +136,15 @@ Alguns casos especiais:
 
 O calendário (`.ics`) é gerado no navegador: um evento por assinatura, que se repete no ciclo dela, com alarmes 14, 7 e 2 dias antes (e 30 no risco alto). Importar de novo atualiza os mesmos eventos.
 
+## A sua IA
+
+O Lighthouse nunca chama uma IA, mas prepara o terreno para a sua: a que já conhece você, e talvez os seus gastos.
+
+- [`docs/ai/`](docs/ai/README.md#em-português): como a tela Ganhos é calculada ([earnings.md](docs/ai/earnings.md#em-português)), análises prontas ([presets.md](docs/ai/presets.md#em-português)) e fontes e APIs públicas ([sources.md](docs/ai/sources.md#em-português)).
+- `npm run earnings`: a tela Ganhos em Markdown ou JSON, com o mesmo motor e os mesmos centavos, mais cenários "e se" (`--extra-liquid 2000`, `--apy 4.5`, `--plan luxe`), itens à mão (`--add "Academia=49,90"`) e os seus próprios avisos do mês (`--changes --save`). Lê a mesma pasta de dados do `npm run pull`; sem dados reais, usa o demo.
+- [`AGENTS.md`](AGENTS.md), para agentes de código (Claude Code, Codex, Cursor…), com as regras de privacidade, as linhas vermelhas e as mudanças comuns para deixar o Lighthouse com a sua cara. O Claude Code ganha também a skill `lighthouse-earnings` (`.claude/skills/`).
+- No app, **Ganhos → Leve para a sua IA** copia a conta do mês em texto para uma IA de chat. Colar compartilha esses números com o serviço.
+
 ## Deploy
 
 O build é um site estático (`npm run build` → `dist/`). O demo e a importação dos seus arquivos (ou dos sintéticos) funcionam em qualquer hospedagem estática.
@@ -160,9 +171,10 @@ npm run build      # tsc + vite build (dist/)
 npm run preview    # serve o dist/
 npm run typecheck  # tsc, estrito
 npm run lint       # ESLint: as regras de hooks do React são erro, o resto é aviso
-npm run check      # os 9 scripts de check, em sequência; falha se algum falhar
+npm run check      # os 10 scripts de check, em sequência; falha se algum falhar
 npm run privacy    # compara tudo o que é publicável (e o dist/) com os seus dados reais; pula se não houver
 npm run pull       # baixa a conta inteira do conector (abre a aprovação da ether.fi)
+npm run earnings   # a tela Ganhos em texto, para você e a sua IA (--json, --extra-liquid, --apy, --changes --save; --help)
 node scripts/gen-demo.mjs     # regenera o dataset do demo (determinístico)
 node scripts/gen-sample.mjs   # regenera fixtures/sample/ (determinístico)
 ```
@@ -179,6 +191,7 @@ O `npm run check` roda:
 | `check-sample` | a fronteira com o conector usando `fixtures/sample/`: páginas, linha repetida, valores em string, estorno, anulada, recusada, moedas, `incomplete`, os arquivos da IA e as regras locais |
 | `check-portfolio` | estados do Portfólio de ponta a ponta: sem depósito, carteira vazia, ferramenta que falhou, arquivo faltante, ativos não listados, saldo sem posições, só stablecoin, câmbio recente e o demo |
 | `check-insights` | motor de AI Insights: contas de crédito e rendimento, série da PTAX, resumo do período, regras de economia e cartões; as linhas vermelhas (sem recomendação, sem IOF, cartão com "por quê?", estimativa marcada) |
+| `check-earnings` | motor de Ganhos: rendimento por cofre Liquid, cashback pelas faixas do mês do plano, taxa observada nos resgates (e quando não dá para medir com honestidade), base de gasto, itens manuais, alocação, escada de marcos e os valores para 50/75/100% (aplicados como cenário, cobrem mesmo); o "o que mudou" e os limiares, o texto para a sua IA, o `npm run earnings` e o `docs/ai/earnings.md` contra o código; as linhas vermelhas (sem recomendação, nenhum marco de "gaste mais" ou de nível de plano) |
 | `check-security` | regressões do red team: confiança do QR/cópia do depósito, links só https, injeção em campos do `.ics`, regex das regras locais, parser de valores, rewards e status do cartão |
 
 Os checks nunca imprimem valores reais. Com os seus dados presentes, eles só conferem invariantes.
@@ -188,7 +201,7 @@ Os checks nunca imprimem valores reais. Com os seus dados presentes, eles só co
 ## Privacidade e segurança
 
 - Sem servidor, sem telemetria, sem analytics de terceiros e sem fontes de terceiros.
-- O login, as suas respostas e os arquivos lembrados ficam neste navegador, sob `lighthouse:v1:*` (localStorage e sessionStorage) e no IndexedDB `lighthouse-v1`. As chaves antigas migram sozinhas, uma vez. **Esquecer tudo neste navegador** (Portfólio → Conexão) apaga tudo, menos o idioma.
+- O login, as suas respostas, as suas escolhas em Ganhos (itens à mão, exclusões, ordem, taxa), a última foto de Ganhos que você viu e os arquivos lembrados ficam neste navegador, sob `lighthouse:v1:*` (localStorage e sessionStorage) e no IndexedDB `lighthouse-v1`. As chaves antigas migram sozinhas, uma vez. **Esquecer tudo neste navegador** (Portfólio → Conexão) apaga tudo, menos o idioma.
 - Desconectar apaga só o login local: a ether.fi não tem endpoint de revogação. Para revogar o acesso de vez, use *Settings → AI Connections* no app da ether.fi.
 - Escopos: `transactions:read`, `cards:read`, `balances:read`. Tudo é só leitura, sem caminho de escrita: o conector não move dinheiro, não altera cartões e não lê números de cartão.
 - Os arquivos da IA vêm da sua própria IA e são tratados como entrada não confiável: cada campo é conferido, os links são verificados e o que eles dizem aparece como vindo da sua IA. Gere-os numa sessão que não consiga enviar nada: veja [`docs/ai-prompts.md`](docs/ai-prompts.md#em-português).
@@ -204,9 +217,11 @@ src/
                  analytics, history, subscriptions), formatos (types, subscriptionTypes, validate), storage, demo/
   state/         store (demo | live | importado | fixtures), locale, attention, decisions
   components/    UI, gráficos SVG, alertas, linha do extrato, peças de assinatura e do portfólio
-  views/         Portfolio (+ Account: Cards, Deposit, Connect), Spending (+ Evolution, Trips), History, Subscriptions, Transactions
+  views/         Portfolio (+ Account: Cards, Deposit, Connect), Spending (+ Evolution, Trips), History, Subscriptions, Earnings, Transactions
 scripts/         pull-history, data-dir, gen-demo, gen-sample, check-*.mts, check-all, privacy-scan
+docs/ai/         para a sua IA: a conta de Ganhos, análises prontas, fontes públicas
 docs/            ai-prompts (o pedido para a sua IA), RELEASING
+AGENTS.md        para agentes de código (o CLAUDE.md aponta para ele; a skill do Claude Code fica em .claude/skills/)
 fixtures/sample/ respostas sintéticas do conector e arquivos da IA (versionados)
 fixtures/live/   os seus dados do npm run pull, se não houver ~/lighthouse-data (fora do git)
 ```

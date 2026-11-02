@@ -45,7 +45,9 @@ lighthouse-data/
 .vscode/*
 !.vscode/extensions.json
 .idea
-.claude/
+# .claude: só as skills do projeto entram (o settings.local.json e o resto ficam de fora)
+.claude/*
+!.claude/skills/
 .vercel/
 .DS_Store
 Thumbs.db

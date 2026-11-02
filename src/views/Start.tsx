@@ -425,6 +425,14 @@ function LookSteps() {
           )}
         </p>
         <p>
+          {tr('Then try ', 'Depois experimente ')}
+          <a href="#/earnings" className="font-medium text-ink underline underline-offset-2">{tr('Earnings', 'Ganhos')}</a>
+          {tr(
+            ': what Liquid yield and expected cashback pay of your subscriptions, as an estimate with the math in view.',
+            ': o que o rendimento do Liquid e o cashback previsto pagam das suas assinaturas, como estimativa e com a conta à mostra.',
+          )}
+        </p>
+        <p>
           <a href="#/portfolio" className="inline-flex min-h-11 items-center gap-1 font-medium text-accent underline-offset-2 hover:underline pointer-fine:min-h-6">
             {isSample ? tr('Open the demo', 'Abrir o demo') : tr('Open the dashboard', 'Abrir o painel')} <span aria-hidden>→</span>
           </a>
@@ -834,6 +842,17 @@ function Extras() {
           )}
         </li>
         <li>
+          <a href="#/earnings" className="font-medium text-ink underline underline-offset-2">{tr('Earnings', 'Ganhos')}</a>
+          {tr(
+            ': “Take it to your AI” copies the month’s sum as text, to paste into ChatGPT, Claude or the AI you use. In the repository, ',
+            ': “Leve para a sua IA” copia a conta do mês em texto, para colar no ChatGPT, no Claude ou na IA que você usa. No repositório, ',
+          )}
+          <Code>npm run earnings</Code>
+          {tr(' gives your AI the same numbers, with “what if” scenarios, and ', ' dá à sua IA os mesmos números, com cenários “e se”, e a pasta ')}
+          {REPO_URL ? <ExternalLink href={`${REPO_URL}/blob/main/docs/ai/README.md`} className="text-ink">docs/ai</ExternalLink> : <Code>docs/ai</Code>}
+          {tr(' explains the math and has ready-made analyses.', ' explica a conta e traz análises prontas.')}
+        </li>
+        <li>
           {tr('You can also connect the same ', 'Você também pode conectar o mesmo ')}
           <ExternalLink href={ETHERFI_CONNECTOR_URL} className="text-ink">{tr('ether.fi connector', 'conector da ether.fi')}</ExternalLink>
           {tr(' to Claude and ask questions about your account in the chat.', ' ao Claude e fazer perguntas sobre a sua conta no chat.')}
@@ -944,6 +963,13 @@ function Faq() {
       tr(
         'No. It reads ether.fi Cash accounts only, through ether.fi’s official connector.',
         'Não. Ele lê só contas ether.fi Cash, pelo conector oficial da ether.fi.',
+      ),
+    ],
+    [
+      tr('What does the Earnings screen calculate?', 'O que a tela Ganhos calcula?'),
+      tr(
+        'Yield = each asset’s value × its reported APY ÷ 12 (Liquid vaults one by one, other assets with an APY apart). Cashback = your card spending base × a rate: the public rates of your level (Core unless you pick another), the rate observed in your claims for comparison, or one you set. Then those earnings pay your recurring items, cheapest first or in your order. Items you add by hand and your choices stay in this browser. It’s an estimate, not a recommendation: APY changes and cashback is paid in a token whose price varies.',
+        'Rendimento = valor de cada ativo × o APY informado ÷ 12 (os cofres Liquid um por um, os outros ativos com APY à parte). Cashback = a sua base de gasto no cartão × uma taxa: as taxas públicas do seu nível (Core, se você não escolher outro), a observada nos seus resgates para comparar, ou uma que você escolhe. Depois esses ganhos pagam as suas recorrências, do mais barato ao mais caro ou na sua ordem. O que você adiciona à mão e as suas escolhas ficam neste navegador. É estimativa, não recomendação: o APY muda e o cashback é pago num token de preço variável.',
       ),
     ],
     [

@@ -1171,18 +1171,20 @@ const DEMO: Record<string, string> = {
   'Claude (Anthropic)': '2026-10-14', 'Uber One': '2026-10-15', YouTube: '2026-10-18', Spotify: '2026-10-23',
   'ChatGPT (OpenAI)': '2026-11-02', 'iCloud+': '2026-11-05', Netflix: '2026-11-11',
   StreamBox: '2026-10-14', 'Pinecell Wireless': '2026-11-08',
+  // as caras de quem cria (v2 da tela Ganhos): todas renovam a mais de 2 semanas, sem aviso novo
+  Higgsfield: '2026-11-03', ElevenLabs: '2026-11-06', Peloton: '2026-11-07', Midjourney: '2026-11-09',
 };
 for (const [name, next] of Object.entries(DEMO)) {
   const r = find(repDemo, name);
   check(`${name}: mensal pela recorrência, renova em ${next.slice(8)}/${next.slice(5, 7)}`, r?.cycle === 'monthly' && r.cycleSource === 'recurrence' && r.nextRenewal === next && r.status === 'active', `${r?.cycle} ${r?.nextRenewal}`);
 }
-check('só essas 15: 13 ativas, a academia cancelada e o curso que parou (lojas, viagens, restaurantes, ingressos e o cinema de vez em quando ficam de fora)',
-  repDemo.records.length === 15 && repDemo.records.filter((r) => r.status === 'active').length === 13, repDemo.records.map((r) => r.name).join(', '));
+check('só essas 19: 17 ativas, a academia cancelada e o curso que parou (lojas, viagens, restaurantes, ingressos e o cinema de vez em quando ficam de fora)',
+  repDemo.records.length === 19 && repDemo.records.filter((r) => r.status === 'active').length === 17, repDemo.records.map((r) => r.name).join(', '));
 check('avisos: Claude e StreamBox em 2 dias (d2), Uber One e YouTube na semana (d7), Spotify em 11 (d14), PhotoVault em 21 (d30, risco alto)',
   repDemo.alerts.map((r) => `${r.name}:${r.alert}`).join() === 'Claude (Anthropic):d2,StreamBox:d2,Uber One:d7,YouTube:d7,Spotify:d14,PhotoVault:d30', repDemo.alerts.map((r) => `${r.name}:${r.alert}`).join());
-check('total mensal 196.76 (anual ÷ 12 incluído)', repDemo.monthlyTotalUsd === 196.76 && repDemo.annualTotalUsd === 2361.13, `${repDemo.monthlyTotalUsd} / ${repDemo.annualTotalUsd}`);
+check('total mensal 647.75 (anual ÷ 12 incluído)', repDemo.monthlyTotalUsd === 647.75 && repDemo.annualTotalUsd === 7773.01, `${repDemo.monthlyTotalUsd} / ${repDemo.annualTotalUsd}`);
 const icsDemo = buildIcs(repDemo.records);
-check('calendário do demo: 13 eventos (as ativas), o alarme de 30 dias só nas 2 de risco alto', (icsDemo.match(/BEGIN:VEVENT/g) ?? []).length === 13
+check('calendário do demo: 17 eventos (as ativas), o alarme de 30 dias só nas 2 de risco alto', (icsDemo.match(/BEGIN:VEVENT/g) ?? []).length === 17
   && (icsDemo.match(/TRIGGER:-P29DT15H/g) ?? []).length === 2);
 const fitpal = find(repDemo, 'FitPal');
 check('anual que renovou hoje sem lembrete: FitPal com risco alto da auditoria, 14 dias para pedir reembolso, em "renovaram há pouco"', fitpal?.cycle === 'annual'
@@ -1208,7 +1210,7 @@ check('a academia parou: cancelada pelo email, risco alto da auditoria, entra pe
   && gym.signals.some((s) => s.kind === 'research') && gym.signals.some((s) => s.kind === 'email'));
 check('Netflix: o aumento na última renovação', find(repDemo, 'Netflix')?.justRenewed?.priceChanged === true);
 const repDemoKb = run('demo com a base pública', demo, { knowledge: SUBSCRIPTION_KNOWLEDGE });
-check('com a base pública: as mesmas 15, com as mesmas renovações e o mesmo total', repDemoKb.records.length === 15 && repDemoKb.monthlyTotalUsd === 196.76
+check('com a base pública: as mesmas 19, com as mesmas renovações e o mesmo total', repDemoKb.records.length === 19 && repDemoKb.monthlyTotalUsd === 647.75
   && Object.entries(DEMO).every(([name, next]) => find(repDemoKb, name)?.nextRenewal === next), repDemoKb.records.map((r) => r.name).join(', '));
 sameInBoth('demo com a base pública, enriquecido em cada idioma', both('demo nos dois idiomas', (locale) => enrichDataset(demoDataset, locale), { knowledge: SUBSCRIPTION_KNOWLEDGE }));
 

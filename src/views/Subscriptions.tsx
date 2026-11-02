@@ -18,6 +18,7 @@ import {
   useCanHover, weekday, weekdayDay,
 } from '../components/subscriptionParts';
 import { TodoPanel } from '../components/subscriptionTodo';
+import { EarningsCoverageLink } from '../components/earningsLink';
 
 const UPCOMING_DAYS = 60;
 const WARN_DAYS = 14;
@@ -168,6 +169,8 @@ export function SubscriptionsView({ target }: { target?: string | null }) {
             {approx}{usd0(report.annualTotalUsd)} {tr('per year', 'por ano')}
             {home ? <span className="whitespace-nowrap"> ≈&nbsp;{money(home.annual, fx!.currency, { compact: true })}</span> : null}
           </span>
+          {/* o atalho para a tela Ganhos: quanto do custo os ganhos estimados pagam */}
+          <EarningsCoverageLink className="mt-1.5" />
         </>
       ),
       why: (
@@ -301,6 +304,8 @@ export function SubscriptionsView({ target }: { target?: string | null }) {
             ))}
           </dl>
         </MobileSummary>
+        {/* celular: os cartões de número ficam escondidos, então o atalho para Ganhos vem logo abaixo da faixa */}
+        <EarningsCoverageLink className="lg:hidden" />
         {aiFileIssues ? (
           // discreto: a análise segue com o que veio inteiro; o aviso só diz que parte dos arquivos da IA ficou de fora
           <p className="flex items-start gap-1.5 text-xs text-muted">

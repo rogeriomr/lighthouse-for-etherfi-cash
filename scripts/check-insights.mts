@@ -271,13 +271,19 @@ for (const locale of ['en', 'pt'] as const) {
   check(`[${locale}] demo: ids únicos, todo cartão com "por quê?", estimativa marcada, fontes https com data`, new Set(ids).size === ids.length && shape(cards));
   check(`[${locale}] demo: nenhuma frase proibida`, lint(cards).length === 0, lint(cards).join(' | '));
   check(`[${locale}] demo: casa em USD, sem cartão de PTAX`, !ids.some((id) => id.startsWith('fx-')));
-  check(`[${locale}] demo: os 5 cartões de economia (anual, sobreposição, reajuste anunciado, clube e DCC)`,
-    ['plan-annual-claude-anthropic', 'plan-overlap-ai_assistant', 'price-change-netflix', 'club-uber-one', 'dcc-recent'].every((id) => ids.includes(id)), ids.filter((id) => !id.startsWith('credit')).join(', '));
+  // v2 da tela Ganhos: o Claude virou Ultra (sem anual) e entraram as caras com anual na tabela (Higgsfield, ElevenLabs,
+  // Midjourney); o YouTube pela loja ganhou o preço do site (imprensa)
+  check(`[${locale}] demo: os cartões de economia (anual × 3, loja × site, sobreposição, reajuste anunciado, clube e DCC)`,
+    ['plan-annual-higgsfield', 'plan-annual-elevenlabs', 'plan-annual-midjourney', 'price-channel-youtube', 'plan-overlap-ai_assistant', 'price-change-netflix', 'club-uber-one', 'dcc-recent'].every((id) => ids.includes(id))
+    && !ids.includes('plan-annual-claude-anthropic'), ids.filter((id) => !id.startsWith('credit')).join(', '));
   check(`[${locale}] demo: o reajuste da Netflix bate com o anunciado (fonte de imprensa marcada)`, cards.find((c) => c.id === 'price-change-netflix')!.sources!.some((s) => s.level === 'press'));
   check(`[${locale}] demo: "desde a última importação" com o retrato que vem no próprio dataset, sem gravar nada`, ids.some((id) => id.startsWith('summary-since-')));
-  const annual = cards.find((c) => c.id === 'plan-annual-claude-anthropic');
-  check(`[${locale}] demo: economia com preço de tabela oficial (Claude Pro, 12 meses ≈ 17% abaixo de 12 mensalidades)`, Boolean(annual) && /17\s?%/.test(annual!.body)
-    && annual!.sources!.some((s) => s.url === 'https://claude.com/pricing' && s.level === 'official'), annual?.body ?? 'ausente');
+  const annual = cards.find((c) => c.id === 'plan-annual-elevenlabs');
+  check(`[${locale}] demo: economia com preço de tabela oficial (ElevenLabs Pro, 12 meses ≈ 17% abaixo de 12 mensalidades)`, Boolean(annual) && /17\s?%/.test(annual!.body)
+    && annual!.sources!.some((s) => s.url === 'https://elevenlabs.io/pricing' && s.level === 'official'), annual?.body ?? 'ausente');
+  const channel = cards.find((c) => c.id === 'price-channel-youtube');
+  check(`[${locale}] demo: YouTube pela loja (20,99) contra o site (15,99), com a fonte de imprensa marcada`, Boolean(channel) && /31\s?%/.test(channel!.body)
+    && channel!.sources!.some((s) => s.level === 'press'), channel?.body ?? 'ausente');
   const eth = cards.find((c) => c.id === 'credit-eth-drop')!;
   check(`[${locale}] simulador: o texto não cita um cenário fixo (o controle mostra) e nada de "×" nos fatos`, !/30\s?%/.test(eth.body) && !eth.facts.some((f) => /30\s?%/.test(f.label) || f.value.includes('×'))
     && eth.facts.length === 3, eth.facts.map((f) => f.label).join(' | '));

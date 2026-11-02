@@ -11,6 +11,7 @@ import {
   AssetsByClass, AttentionLine, ClassSplit, DimCents, EarningCredit, FxLine, PartialNote, RewardsPanel, SpendBridge, snapshotLabel, useAccountName,
 } from '../components/portfolio';
 import { DemoBanner } from '../components/demoBanner';
+import { EarningsHero } from '../components/earningsHero';
 
 // cartões, depósito e conexão (a antiga Conta) num pedaço próprio: a Conexão é grande e o Portfólio é a primeira tela
 const loadSections = () => import('./Account');
@@ -146,6 +147,9 @@ function Overview({ onTab, onNavigate }: { onTab: (t: AccountTab) => void; onNav
         <PartialNote s={s} />
         {fx ? <FxLine total={s.total} fx={fx} /> : null}
       </div>
+
+      {/* o que os ganhos pagam: o resumo da tela Ganhos, logo abaixo do saldo (o dono pediu na primeira página) */}
+      <EarningsHero onOpen={() => onNavigate('earnings')} />
 
       {/* o que espera você (renovações e alertas) mora em Gastos: esta linha leva até o painel, só quando há algo */}
       <AttentionLine onOpen={() => onNavigate('spending', { target: 'attention' })} />
