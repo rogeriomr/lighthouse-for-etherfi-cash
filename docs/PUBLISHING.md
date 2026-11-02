@@ -34,21 +34,22 @@ os objetos. Não existe "apagar depois": a única proteção confiável é confe
 
 O `.vercelignore` repete o critério para quem faz deploy pela CLI da Vercel, que **não lê** o `.gitignore`.
 
-## 3. Estado publicado (21/10/2026)
+## 3. Estado publicado (02/11/2026)
 
-- Repositório público `rogeriomr/lighthouse-for-etherfi-cash`; `main` atualizado com o patch de segurança do Node
-  22.23.4, árvore limpa e upstream `origin/main` via SSH.
+- Repositório público `rogeriomr/lighthouse-for-etherfi-cash`; `main` em `65f08f7` (tela Earnings, resumo no
+  Portfólio, `docs/ai/`, `AGENTS.md`), árvore limpa e upstream `origin/main` via SSH.
 - Demo em produção: <https://lighthouse-for-etherfi-cash.vercel.app>. O projeto na Vercel não tem integração Git; o
-  deploy é feito pela CLI (`vercel deploy --prod --yes`). Último deploy validado: HTTP 200, CSP/CORP presentes e
-  `/callback` com `no-store`.
+  deploy é feito pela CLI (`vercel deploy --prod --yes`). Último deploy (02/11/2026, `65f08f7`) validado: HTTP 200,
+  mesmo bundle do build local, CSP/CORP presentes, `/callback` com `no-store` e 0 violação de CSP do app nas 8 telas em
+  1440 e 390 px (as únicas vieram do script que o antivírus da máquina injeta).
 - CI verde nos jobs `Node 22.23.4` e `Node 24.22.1` (typecheck, lint, build, `npm run check` e `npm run privacy`).
 - `main` protegida: os dois checks são obrigatórios, sem force-push, sem deleção, histórico linear e conversas
   resolvidas; `enforce_admins: false` (decisão consciente para projeto solo).
 - Segurança do repositório: secret scanning com push protection, relato privado de vulnerabilidade e Dependabot
   alerts/security updates ativos.
-- `npm run privacy`: **0 GRAVE, 0 aviso fora da allowlist**, comparando **229 arquivos publicáveis** com **5.175
+- `npm run privacy`: **0 GRAVE, 0 aviso fora da allowlist**, comparando **263 arquivos publicáveis** com **5.175
   valores** sensíveis dos dados reais.
-- 7 prints do demo em `docs/screenshots/` (desktop 1366×900, mobile 780×1688), usados no README.
+- 8 prints do demo em `docs/screenshots/` (desktop 1366×900, mobile 780×1688), usados no README.
 - Sem `.env.local`, `fixtures/live/` ou `.pull-client.json`; dados reais em `%USERPROFILE%\lighthouse-data`.
 - **Pendente:** ativar 2FA/passkey na conta, mover o projeto para fora do OneDrive e criar a release `v0.1.0`.
 - O primeiro push usou uma deploy key de escrita (`lighthouse deploy`, chave em `~/.ssh/lighthouse_ed25519`) porque
@@ -73,6 +74,7 @@ O `.vercelignore` repete o critério para quem faz deploy pela CLI da Vercel, qu
 | 21/10/2026 | Push para `main` via deploy key; CI verde nos dois Nodes |
 | 21/10/2026 | Branch protection e recursos de segurança do GitHub ativados |
 | 21/10/2026 | Baseline Node.js elevado para 22.23.4 (CI 24.22.1) após os releases de segurança |
+| 02/11/2026 | Commit `65f08f7` (Earnings, `docs/ai/`, `AGENTS.md`): push para `main`, CI verde nos dois Nodes e deploy em produção |
 | Pendente | 2FA/passkey, saída do OneDrive e release `v0.1.0` |
 
 ## 4. Decisões que são suas (e que o código não decide)
