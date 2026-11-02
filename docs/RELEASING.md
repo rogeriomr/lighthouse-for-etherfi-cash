@@ -84,7 +84,7 @@ Wait for the first CI run to finish green (*Actions* tab): its two jobs are name
 gh api -X PUT repos/$R/branches/main/protection --input - <<'EOF'
 {
   "required_status_checks": { "strict": true, "contexts": ["Node 22.23.4", "Node 24.22.1"] },
-  "enforce_admins": false,
+  "enforce_admins": true,
   "required_pull_request_reviews": null,
   "restrictions": null,
   "allow_force_pushes": false,
@@ -92,6 +92,8 @@ gh api -X PUT repos/$R/branches/main/protection --input - <<'EOF'
 }
 EOF
 ```
+
+With `enforce_admins` on, the rule holds for admins too: every change, yours included, reaches `main` through a pull request whose two checks are green. A direct push to `main` is refused.
 
 - [ ] A test PR shows "Required" next to both checks.
 
@@ -110,16 +112,26 @@ gh repo edit $R --homepage "https://github.com/$R#readme" \
 
 ## Cutting a release
 
-1. In [`CHANGELOG.md`](../CHANGELOG.md), give the version its date (for 0.1.0, replace "unreleased" with today's date). `package.json` already says 0.1.0; for later versions, `npm version <x.y.z> --no-git-tag-version` updates it and the lock together.
+`main` only takes pull requests with green checks (step 6), so a release goes through one too.
+
+1. On a branch, give the version its date in [`CHANGELOG.md`](../CHANGELOG.md): rename `## [Unreleased]` to `## [x.y.z] - YYYY-MM-DD`, open an empty `## [Unreleased]` above it and update the compare links at the bottom. `npm version <x.y.z> --no-git-tag-version` updates `package.json` and the lock together.
 2. Run the checks of step 1 again, including `npm run privacy`.
-3. Commit, tag and publish:
+3. Open the pull request, wait for both checks, merge, then tag the merged commit and publish. The release notes are the version's section of the CHANGELOG:
 
 ```bash
-git commit -am "Release 0.1.0"
-git tag -a v0.1.0 -m "Lighthouse for ether.fi Cash 0.1.0"
-git push origin main v0.1.0
-gh release create v0.1.0 --title "Lighthouse for ether.fi Cash 0.1.0" --notes "See CHANGELOG.md for what changed."
+git checkout -b release/vX.Y.Z
+git commit -am "Release X.Y.Z"
+git push -u origin release/vX.Y.Z
+gh pr create --fill
+gh pr checks --watch
+gh pr merge --squash --delete-branch
+git checkout main && git pull --ff-only
+git tag -a vX.Y.Z -m "Lighthouse for ether.fi Cash X.Y.Z"
+git push origin vX.Y.Z
+gh release create vX.Y.Z --title "Lighthouse for ether.fi Cash X.Y.Z" --notes-file notes.md
 ```
+
+4. If the demo is deployed with the Vercel CLI, deploy from the tagged commit (`vercel deploy --prod --yes`) and check that the site serves the same `index-*.js` as the local build.
 
 Release notes and screenshots come only from the demo or the synthetic fixtures, never from a real account.
 
@@ -132,6 +144,6 @@ Lista do dono para o primeiro push público, na ordem:
 3. **Conferir o que entra:** `git add -n .`, `git status --ignored --short` e `git check-ignore -v …` (passo 3). Nada de `fixtures/live/`, `fixtures/.pull-client.json`, `dist/`, `node_modules/`, `.claude/`, `*.tsbuildinfo`, `.env*`, `*.local.json`, exportações `.ics`/`.csv`/`.har` nem prints de conta real; em `fixtures/` só entra `fixtures/sample/`. Deploy pela CLI da Vercel a partir desta pasta depende do `.vercelignore` (a CLI não lê o `.gitignore`). Depois do 1º commit, `git log -1 --format='%an <%ae>'` tem de mostrar o noreply.
 4. **Enviar:** o repositório remoto já existe (público e vazio): `git remote add origin https://github.com/rogeriomr/lighthouse-for-etherfi-cash.git` e `git push -u origin main` (passo 4).
 5. **Segurança:** relato privado de vulnerabilidade, secret scanning com push protection, alertas e atualizações de segurança do Dependabot (passo 5).
-6. **Proteger a `main`:** depois do 1º CI verde, exigir os checks **Node 22.23.4** e **Node 24.22.1** (passo 6).
+6. **Proteger a `main`:** depois do 1º CI verde, exigir os checks **Node 22.23.4** e **Node 24.22.1**, com `enforce_admins` ligado: a regra vale também para o admin, então toda mudança entra por pull request com os dois checks verdes (passo 6).
 7. **Descrição e tópicos** (passo 7), e, se quiser, a imagem de prévia com a captura do demo.
-8. **Release v0.1.0:** passar o "Unreleased" do CHANGELOG para a versão com a data, conferir tudo de novo, `git tag -a v0.1.0`, `git push origin main v0.1.0` e `gh release create v0.1.0` (seção "Cutting a release").
+8. **Release:** numa branch, passar o "Unreleased" do CHANGELOG para a versão com a data e `npm version <x.y.z> --no-git-tag-version`; conferir tudo de novo; abrir o pull request, esperar os dois checks e fazer o merge; então `git tag -a vX.Y.Z` no commit do merge, `git push origin vX.Y.Z` e `gh release create` com a seção da versão no CHANGELOG como notas (seção "Cutting a release").

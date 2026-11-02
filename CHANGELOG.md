@@ -4,6 +4,8 @@ All notable changes to this project. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-02
+
 ### Added
 
 - **Earnings** (`#/earnings`): what your estimated earnings pay for among your recurring costs. Yield per Liquid vault (and other assets with an APY) plus the expected card cashback flow into your subscriptions and recurring bills, cheapest first or in your own order, each paid in full or in part.
@@ -68,3 +70,7 @@ First public version.
 - The `.ics` export strips control characters, so a lone carriage return can no longer inject calendar properties.
 - The OAuth callback is handled only with a sign-in pending and shows fixed messages, never text from the URL. The token refresh runs once even when several requests expire together.
 - The dev-only `/__fixtures` endpoint answers only the local machine and is sent with `no-store`; its code no longer ships in the production bundle.
+
+[Unreleased]: https://github.com/rogeriomr/lighthouse-for-etherfi-cash/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/rogeriomr/lighthouse-for-etherfi-cash/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/rogeriomr/lighthouse-for-etherfi-cash/releases/tag/v0.1.0

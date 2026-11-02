@@ -36,22 +36,29 @@ O `.vercelignore` repete o critério para quem faz deploy pela CLI da Vercel, qu
 
 ## 3. Estado publicado (02/11/2026)
 
-- Repositório público `rogeriomr/lighthouse-for-etherfi-cash`; `main` em `65f08f7` (tela Earnings, resumo no
-  Portfólio, `docs/ai/`, `AGENTS.md`), árvore limpa e upstream `origin/main` via SSH.
+- Repositório público `rogeriomr/lighthouse-for-etherfi-cash`; `main` na release **0.2.0** (tela Earnings, resumo
+  no Portfólio, `docs/ai/`, `AGENTS.md`), árvore limpa e upstream `origin/main` via SSH.
+- Releases com tag anotada e notas tiradas do `CHANGELOG.md`: `v0.1.0` (21/10/2026, `389c01e`) e `v0.2.0`
+  (02/11/2026, a mais recente). Tópicos do repositório e homepage (o demo) definidos.
 - Demo em produção: <https://lighthouse-for-etherfi-cash.vercel.app>. O projeto na Vercel não tem integração Git; o
   deploy é feito pela CLI (`vercel deploy --prod --yes`). Último deploy (02/11/2026, `65f08f7`) validado: HTTP 200,
   mesmo bundle do build local, CSP/CORP presentes, `/callback` com `no-store` e 0 violação de CSP do app nas 8 telas em
   1440 e 390 px (as únicas vieram do script que o antivírus da máquina injeta).
 - CI verde nos jobs `Node 22.23.4` e `Node 24.22.1` (typecheck, lint, build, `npm run check` e `npm run privacy`).
 - `main` protegida: os dois checks são obrigatórios, sem force-push, sem deleção, histórico linear e conversas
-  resolvidas; `enforce_admins: false` (decisão consciente para projeto solo).
+  resolvidas; `enforce_admins: true` desde 02/11/2026 (decisão do dono, seção 4): a regra vale também para o admin,
+  então toda mudança entra por pull request com os dois checks verdes. Antes era `false`, e o push de `65f08f7` passou
+  por cima dos checks (o CI rodou depois e passou); a release 0.2.0 já entrou por pull request.
 - Segurança do repositório: secret scanning com push protection, relato privado de vulnerabilidade e Dependabot
-  alerts/security updates ativos.
+  alerts/security updates ativos. Alerta `GHSA-g3hv-75wg-m249` (minimatch < 11.0.1, só no lint) dispensado em
+  02/11/2026 como código vulnerável não usado: a falha exige `optimizationLevel >= 2`, e eslint, `@eslint/config-array`
+  e typescript-eslint usam o padrão (1); não há versão corrigida compatível com eles. O Dependabot reabre ou corrige
+  quando eles subirem para o minimatch 11.
 - `npm run privacy`: **0 GRAVE, 0 aviso fora da allowlist**, comparando **263 arquivos publicáveis** com **5.175
   valores** sensíveis dos dados reais.
 - 8 prints do demo em `docs/screenshots/` (desktop 1366×900, mobile 780×1688), usados no README.
 - Sem `.env.local`, `fixtures/live/` ou `.pull-client.json`; dados reais em `%USERPROFILE%\lighthouse-data`.
-- **Pendente:** ativar 2FA/passkey na conta, mover o projeto para fora do OneDrive e criar a release `v0.1.0`.
+- **Pendente:** ativar 2FA/passkey na conta e mover o projeto para fora do OneDrive.
 - O primeiro push usou uma deploy key de escrita (`lighthouse deploy`, chave em `~/.ssh/lighthouse_ed25519`) porque
   o token do `gh` não tinha o escopo `workflow`; o remote `origin` ficou em SSH.
 
@@ -75,7 +82,8 @@ O `.vercelignore` repete o critério para quem faz deploy pela CLI da Vercel, qu
 | 21/10/2026 | Branch protection e recursos de segurança do GitHub ativados |
 | 21/10/2026 | Baseline Node.js elevado para 22.23.4 (CI 24.22.1) após os releases de segurança |
 | 02/11/2026 | Commit `65f08f7` (Earnings, `docs/ai/`, `AGENTS.md`): push para `main`, CI verde nos dois Nodes e deploy em produção |
-| Pendente | 2FA/passkey, saída do OneDrive e release `v0.1.0` |
+| 02/11/2026 | `enforce_admins` ligado; release 0.2.0 por pull request com CI verde; tags e releases `v0.1.0` e `v0.2.0` |
+| Pendente | 2FA/passkey e saída do OneDrive |
 
 ## 4. Decisões que são suas (e que o código não decide)
 
@@ -91,7 +99,7 @@ O `.vercelignore` repete o critério para quem faz deploy pela CLI da Vercel, qu
 4. **Marca.** O nome usa "ether.fi Cash"; o app se declara independente, sem logo nem cor da ether.fi. É uso
    nominativo, mas é marca de terceiro: não há aval da ether.fi.
 5. **Rigor da proteção da `main`.** `enforce_admins: false` deixa você contornar a proteção; `true` exige PR e CI até
-   para o dono. Para um app que lê finanças, `true` é mais seguro (e mais burocrático).
+   para o dono. Para um app que lê finanças, `true` é mais seguro (e mais burocrático). **Decidido em 02/11/2026: `true`.**
 6. **Nome/owner do repositório.** `REPO_URL` em `src/lib/config.ts`, `repository`/`homepage`/`bugs` em
    `package.json` e os links de `README`/`CONTRIBUTING`/`RELEASING` apontam para
    `rogeriomr/lighthouse-for-etherfi-cash`. Um fork precisa trocar esses arquivos.
@@ -176,7 +184,7 @@ Em *Settings → Code security* (ou pelos comandos do `RELEASING.md`):
 - [x] Dependabot alerts e security updates (o `.github/dependabot.yml` já agenda atualizações de versão).
 - [ ] **Pendente:** 2FA/passkey na conta; códigos de recuperação guardados fora do navegador.
 - [x] `main` protegida: checks **Node 22.23.4** e **Node 24.22.1** obrigatórios, sem force push e sem deleção.
-- [x] `enforce_admins` decidido: `false` (projeto solo; ver seção 4).
+- [x] `enforce_admins` decidido: `true` desde 02/11/2026 (antes `false`; ver seção 4).
 - [x] CODEOWNERS cobre `package.json`, lockfile, config de deploy, `scripts/` e os módulos sensíveis
       (`oauth.ts`, `mcp.ts`, `storage.ts`, `normalize.ts`).
 
@@ -212,6 +220,6 @@ Em *Settings → Code security* (ou pelos comandos do `RELEASING.md`):
 - [x] Primeiro commit com autor noreply.
 - [x] Repositório público criado; CI verde nos dois Nodes.
 - [x] Secret scanning + push protection, relato privado, Dependabot.
-- [x] `main` protegida com os checks e sem force push; `enforce_admins: false`.
+- [x] `main` protegida com os checks e sem force push; `enforce_admins: true`.
 - [x] Prints conferidos a olho (selo "demo").
-- [ ] **Pendente:** release v0.1.0 com notas e prints do demo.
+- [x] Releases `v0.1.0` e `v0.2.0` com notas do CHANGELOG (a 0.2.0 com o print do demo).
