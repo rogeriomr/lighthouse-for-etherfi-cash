@@ -4,6 +4,18 @@ All notable changes to this project. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-06
+
+### Added
+
+- **Borrow** (`#/borrow`): your Borrow-mode loan the way Aave lays out a position, in plain words (no health factor on screen). Borrowed, net worth, net APY, borrow power used and what's available; **what the collateral earns vs. what the loan costs** (yield and interest side by side, yield ÷ interest, the debt up to which interest stays below the yield) and a month-by-month chart of **how much of the loan the collateral's profit has paid** (yield minus loan interest, against what you borrowed), with vertical lines at 5%, 10%, 25%, 50%, 75% and 100% and their months, and a plain-words caption; **scenarios** at the top (1 · your account, 2 · lots of collateral: $50k USD Yield against $5k USDT, 3 · ETH collateral: $20k ETH Yield + $5k USD against $13k USDT, near the limit); the after-interest figure and its bars per **7 days, month or year**; how much the collateral earns and the loan grows **a month**, in green and red, per panel and per line; a **rate note** comparing loans in the same currency (and what changes beyond the rate); **your collateral** with only what's active, *Add* (the Earn vaults first, USD Bold, USD RWAs, USD, ETH, BTC and EUR, with the APY the app showed) and *Sync*; in the demo, the collateral here is only LiquidUSD, weETH and ETHFI; **your borrow** like the ether.fi app (active and available loans with rates), dollars (USDT + USDC), ETH and euros apart and a *Details* switch per asset; any number becomes a simulation; a card per volatile collateral (ETH, BTC…), side by side, with candles and three steps, each with its line and zone: **warning** (yellow), **attention** (orange, where the card stops spending) and **potential liquidation** (red), the alarm suggested at the yellow warning, a distance ruler and a "what if" slider; and **alarms** (loan health, debt, price) that check your real position, show on screen and on the menu, and can notify you in the browser while the tab is open. Parameters from ether.fi's published Lending Market Parameters (Aave V4 on Optimism, 2026-08-27); loan rates as seen in the app on 2026-11-05, editable.
+- The ETHFI and sETHFI icons use the ether.fi mark from its official press kit. Token icons drawn for the project (MIT) for BTC, weETH, eBTC and the Liquid vaults (liquidUSD, liquidBold, liquidRWA, liquidEUR, liquidETH, liquidBTC, liquidReserve), which had none and have no artwork in the press kit: the asset's base glyph on a coin with a small badge (see `public/tokens/NOTICE.md`). *Add collateral* opens cards with the logo, the Earn vaults first with their APY.
+- `check-borrow`: the Borrow math with fixed targets (the classic US$ 10,000 at 4.75% vs. US$ 300 at 3.55%), loans grouped by currency, liquidation prices with dollar and WETH debt, the projection and its 25/50/75/100% marks, alarms, stored preferences and candles, a lint of the screen's texts (no advice, no "health factor"), and invariants on your real data.
+
+### Security
+
+- The Content-Security-Policy now also allows `https://api.exchange.coinbase.com`, used only by the Borrow price charts after you turn them on (public candles; no cookie, no referrer, nothing about your account).
+
 ## [0.2.0] - 2026-11-02
 
 ### Added
@@ -71,6 +83,7 @@ First public version.
 - The OAuth callback is handled only with a sign-in pending and shows fixed messages, never text from the URL. The token refresh runs once even when several requests expire together.
 - The dev-only `/__fixtures` endpoint answers only the local machine and is sent with `no-store`; its code no longer ships in the production bundle.
 
-[Unreleased]: https://github.com/rogeriomr/lighthouse-for-etherfi-cash/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/rogeriomr/lighthouse-for-etherfi-cash/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/rogeriomr/lighthouse-for-etherfi-cash/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/rogeriomr/lighthouse-for-etherfi-cash/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/rogeriomr/lighthouse-for-etherfi-cash/releases/tag/v0.1.0

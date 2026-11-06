@@ -800,8 +800,8 @@ function Security() {
           '“Lembrar neste navegador” guarda neste navegador (IndexedDB) até “Esquecer estes arquivos”. “Esquecer tudo neste navegador” apaga também as suas respostas e o login; só o idioma fica.',
         ))}
         {item(tr(
-          'A published copy talks only to itself and to ether.fi’s connector: the Content-Security-Policy in the repository blocks everything else.',
-          'Uma cópia publicada só fala com ela mesma e com o conector da ether.fi: a Content-Security-Policy do repositório bloqueia o resto.',
+          'A published copy talks only to itself and to ether.fi’s connector (plus Coinbase Exchange’s public candles, if you turn on the Borrow price charts): the Content-Security-Policy in the repository blocks everything else.',
+          'Uma cópia publicada só fala com ela mesma e com o conector da ether.fi (e com os candles públicos da Coinbase Exchange, se você ligar os gráficos de preço do Empréstimo): a Content-Security-Policy do repositório bloqueia o resto.',
         ))}
       </ul>
       <h3 className="pt-2 font-medium text-ink">{tr('Revoking access', 'Revogar o acesso')}</h3>

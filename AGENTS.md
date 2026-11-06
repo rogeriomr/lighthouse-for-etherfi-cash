@@ -4,7 +4,7 @@ For AI agents working in this repository: Claude Code, Codex, Cursor, Copilot an
 
 ## What this is
 
-A read-only dashboard for an ether.fi Cash account that runs entirely in the browser: React 19, Vite, TypeScript (strict), Tailwind v4, hash routes. It never calls an AI, has no backend and sends nothing to third parties (strict CSP). Independent project, not made or endorsed by ether.fi.
+A read-only dashboard for an ether.fi Cash account that runs entirely in the browser: React 19, Vite, TypeScript (strict), Tailwind v4, hash routes. It never calls an AI, has no backend and sends nothing to third parties (strict CSP), except public candles from Coinbase Exchange on the Borrow screen once the person turns price charts on. Independent project, not made or endorsed by ether.fi.
 
 ## Commands
 
@@ -13,7 +13,7 @@ A read-only dashboard for an ether.fi Cash account that runs entirely in the bro
 | `npm install` | Dependencies (Node ≥ 22.23.4, see `.nvmrc`) |
 | `npm run dev` | Dev server on `localhost:5173`. Another project may already use 5173: then `npm run dev -- --port 5174`, and never stop a process you didn't start. |
 | `npm run earnings` | **The Earnings screen as text**, same engine, same cents: `--json`, `--extra-liquid 2000`, `--apy 4.5`, `--plan luxe`, `--add "Gym=49.90"`, `--exclude Netflix`, `--changes --save`. See `npm run earnings -- --help`. |
-| `npm run check` | The 10 check scripts (`scripts/check-*.mts`) |
+| `npm run check` | The 11 check scripts (`scripts/check-*.mts`) |
 | `npm run typecheck` · `npm run lint` | tsc and ESLint (React hooks rules are errors) |
 | `npm run privacy` | Scans everything publishable against the person's real data. Run it before any commit or publish. |
 | `npm run build` | Production build |
@@ -27,6 +27,7 @@ A read-only dashboard for an ether.fi Cash account that runs entirely in the bro
 | `src/components/` | Panels and parts; `earnings*.tsx` are the Earnings screen and its summary on Portfolio |
 | `src/lib/earnings.ts` | The Earnings engine (pure functions): yield, cashback, allocation, milestones, `COVERAGE_TARGETS` |
 | `src/lib/earningsWhatIf.ts` · `earningsChanges.ts` · `earningsReport.ts` | Scenarios, "what changed" with its thresholds, the text and JSON for an AI |
+| `src/lib/borrow.ts` · `src/lib/prices.ts` | The Borrow engine (loans grouped by currency, liquidation and attention prices, yield vs. interest, the 25/50/75/100% "paid" marks, alarms) with ether.fi's published market parameters; the opt-in Coinbase Exchange candles |
 | `src/lib/insights/cashbackPlans.ts` | Public cashback bands per plan, with source and date |
 | `src/lib/subscriptions.ts` · `src/lib/insights/priceBook.ts` | Subscription detection and public prices |
 | `src/lib/storage.ts` | Everything kept in the browser (`lighthouse:v1:*`) |
@@ -64,6 +65,7 @@ Don't recompute Earnings by hand: run `npm run earnings` (or `--json`) and use i
 | Earnings as the first screen | `DEFAULT_VIEW` in `src/lib/nav.ts` |
 | Other colors | Tokens in `src/styles/app.css`; Earnings sources in `EARN_COLORS` (`src/components/earningsData.ts`) |
 | Names or categories for their own merchants | `merchant-rules.json` in the data folder (local, never committed) |
+| New lending parameters or loan rates from ether.fi | `MARKET_ASSETS`, `HF` and `OBSERVED_RATES` in `src/lib/borrow.ts`, with source and date (`scripts/check-borrow.mts` checks them) |
 | New cashback bands from ether.fi | `src/lib/insights/cashbackPlans.ts` with source and date, plus `docs/ai/earnings.md` (the check compares them) |
 
 ## Before you say it's done
