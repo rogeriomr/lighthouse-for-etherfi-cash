@@ -39,6 +39,12 @@
   --color-warn: #e3b967;
   --color-bad: #ff8a80;
   --color-info: #8cc7e6;
+  /*
+   * Os três degraus do risco de preço na tela Empréstimo: aviso (amarelo), atenção (laranja) e liquidação (bad).
+   * No cartão #191816: amarelo 12,2:1 e laranja 7,8:1 (o bad dá 7,8:1); o matiz anda ≈ 20° de um para o outro (48°, 25°, 5°).
+   */
+  --color-caution: #f2d566;
+  --color-orange: #f5944f;
   /* a marca do Lighthouse (o farol) fica no dourado tan do app da ether.fi: só no logo, não é cor de interface */
   --color-brand: #ccaa77;
   /*

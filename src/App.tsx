@@ -1,6 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import type { ComponentType, RefObject } from 'react';
-import { ArrowLeftRight, BookOpen, CalendarClock, CircleAlert, Ellipsis, HandCoins, HistoryIcon, PieChart, RefreshCw, Sparkles, Wallet, X } from 'lucide-react';
+import { ArrowLeftRight, BookOpen, Landmark, CalendarClock, CircleAlert, Ellipsis, HandCoins, HistoryIcon, PieChart, RefreshCw, Sparkles, Wallet, X } from 'lucide-react';
 import { StoreProvider, useStore } from './state/store';
 import { LocaleProvider, useLocale, useLocaleSwitch, useTr } from './state/locale';
 import { attentionSummary, useAttention, waitingLabel } from './state/attention';
@@ -13,6 +13,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { ScreenSkeleton } from './components/skeleton';
 import { useInsightsOn } from './components/insightsPref';
 import { useEarningsNews } from './components/earningsData';
+import { BorrowAlarmWatcher, useAlarmStates } from './components/borrowData';
 import { useMedia } from './components/useMedia';
 import { dateRange } from './lib/format';
 import { DEFAULT_VIEW, VIEW_SLUG, viewOfSlug } from './lib/nav';
@@ -45,6 +46,7 @@ const SCREENS = {
   history: screen(() => import('./views/History').then((m) => m.HistoryView)),
   subscriptions: screen(() => import('./views/Subscriptions').then((m) => m.SubscriptionsView)),
   earnings: screen(() => import('./views/Earnings').then((m) => m.EarningsView)),
+  borrow: screen(() => import('./views/Borrow').then((m) => m.BorrowView)),
   statement: screen(() => import('./views/Transactions').then((m) => m.TransactionsView)),
   insights: screen(() => import('./views/Insights').then((m) => m.InsightsView)),
   start: screen(() => import('./views/Start').then((m) => m.StartView)),
@@ -54,6 +56,7 @@ const SpendingScreen = SCREENS.spending.Screen;
 const HistoryScreen = SCREENS.history.Screen;
 const SubscriptionsScreen = SCREENS.subscriptions.Screen;
 const EarningsScreen = SCREENS.earnings.Screen;
+const BorrowScreen = SCREENS.borrow.Screen;
 const TransactionsScreen = SCREENS.statement.Screen;
 const InsightsScreen = SCREENS.insights.Screen;
 const StartScreen = SCREENS.start.Screen;
@@ -65,6 +68,7 @@ const NAV: { id: View; label: [string, string]; short?: [string, string]; icon: 
   { id: 'history', label: ['History', 'Histórico'], icon: HistoryIcon },
   { id: 'subscriptions', label: ['Subscriptions', 'Assinaturas'], short: ['Subs', 'Assinat.'], icon: CalendarClock },
   { id: 'earnings', label: ['Earnings', 'Ganhos'], icon: HandCoins },
+  { id: 'borrow', label: ['Borrow', 'Empréstimo'], short: ['Borrow', 'Empréstimo'], icon: Landmark },
   { id: 'statement', label: ['Activity', 'Extrato'], icon: ArrowLeftRight },
   // começa desligada: o item fica na navegação com o selo "off", e a tela mostra o convite
   { id: 'insights', label: ['AI Insights', 'AI Insights'], short: ['Insights', 'Insights'], icon: Sparkles },
@@ -425,6 +429,7 @@ function Shell() {
         className="min-w-0 flex-1 pb-[calc(5rem+env(safe-area-inset-bottom))] short:pb-[calc(3.75rem+env(safe-area-inset-bottom))] lg:pb-0"
       >
         <CoverageHeader onRefresh={handleRefresh} />
+        <BorrowAlarmWatcher />
         <div className="mx-auto max-w-6xl px-4 py-5 sm:px-5 sm:py-6">
           {/* na Conexão o próprio painel já mostra o erro, com os passos para resolver */}
           {view === 'portfolio' && accountTab === 'connect' ? null : <LoadErrorBanner onConnection={() => navigate('portfolio', { accountTab: 'connect' })} />}
@@ -445,6 +450,7 @@ function Shell() {
               {view === 'history' ? <HistoryScreen /> : null}
               {view === 'subscriptions' ? <SubscriptionsScreen target={target} /> : null}
               {view === 'earnings' ? <EarningsScreen onNavigate={navigate} /> : null}
+              {view === 'borrow' ? <BorrowScreen onNavigate={navigate} /> : null}
               {/* o mês e a linha vêm da URL: trocar por link remonta a lista com o filtro novo */}
               {view === 'statement' ? <TransactionsScreen key={`${month ?? 'all'}|${target ?? ''}`} initialMonth={month} target={target} /> : null}
               {view === 'insights' ? <InsightsScreen onNavigate={navigate} /> : null}
@@ -641,7 +647,10 @@ function MoreMenu({ current, attention, quiet, onNav }: { current: View; attenti
           active ? 'text-ink' : 'text-faint hover:text-muted',
         )}
       >
-        <Ellipsis aria-hidden className={cx('size-5', active && 'text-accent')} />
+        <span className="relative">
+          <Ellipsis aria-hidden className={cx('size-5', active && 'text-accent')} />
+          {current !== 'borrow' ? <BorrowAlarmDot variant="bar" /> : null}
+        </span>
         <span className={cx('max-w-full truncate tracking-tight sm:tracking-normal', active && 'font-medium')}>{tr('More', 'Mais')}</span>
         {active ? <span className="sr-only">, {here ? tr(...here.label) : tr(...START_LABEL)}</span> : null}
       </button>
@@ -755,6 +764,7 @@ function NavButton({ item, variant, active, attention, quiet, onClick }: {
           </span>
         ) : null}
         {item.id === 'earnings' && !side && !active ? <EarningsNewsDot variant="bar" /> : null}
+        {item.id === 'borrow' && !side && !active ? <BorrowAlarmDot variant="bar" /> : null}
       </span>
       <span className={cx('max-w-full truncate', !side && 'tracking-tight sm:tracking-normal', active && 'font-medium')}>
         {side ? tr(...item.label) : (
@@ -781,6 +791,7 @@ function NavButton({ item, variant, active, attention, quiet, onClick }: {
         </>
       ) : null}
       {item.id === 'earnings' && side && !active ? <EarningsNewsDot variant="side" /> : null}
+      {item.id === 'borrow' && side && !active ? <BorrowAlarmDot variant="side" /> : null}
     </button>
   );
 }
@@ -797,6 +808,20 @@ function EarningsNewsDot({ variant }: { variant: 'side' | 'bar' }) {
   return (
     <>
       <span aria-hidden className={cx('size-2 rounded-full bg-accent', variant === 'bar' ? 'absolute -top-0.5 -right-1' : 'ml-auto')} title={label} />
+      <span className="sr-only">, {label}</span>
+    </>
+  );
+}
+
+/** O ponto vermelho no item "Empréstimo": um alarme disparou (health factor, dívida ou preço). Some quando ele volta ao normal. */
+function BorrowAlarmDot({ variant }: { variant: 'side' | 'bar' }) {
+  const tr = useTr();
+  const firing = useAlarmStates().filter((s) => s.triggered === true).length;
+  if (!firing) return null;
+  const label = firing === 1 ? tr('1 alarm firing', '1 alarme disparado') : tr(`${firing} alarms firing`, `${firing} alarmes disparados`);
+  return (
+    <>
+      <span aria-hidden className={cx('size-2 rounded-full bg-bad', variant === 'bar' ? 'absolute -top-0.5 -right-1' : 'ml-auto')} title={label} />
       <span className="sr-only">, {label}</span>
     </>
   );

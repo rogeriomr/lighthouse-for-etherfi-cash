@@ -21,6 +21,12 @@ export const KEYS = {
   earnings: 'earnings-prefs',
   /** tela Ganhos: a última foto vista, uma para o demo e uma para os dados reais (lib/earningsChanges.ts, "o que mudou") */
   earningsSeen: 'earnings-seen',
+  /** tela Empréstimo: ativo e taxa da dívida, o gasto na projeção, os alarmes e o aceite dos preços (lib/borrow.ts) */
+  borrow: 'borrow-prefs',
+  /** sessionStorage: os candles da Coinbase Exchange por 10 minutos, para trocar de tela sem buscar de novo */
+  prices: 'price-cache',
+  /** sessionStorage: os alarmes que já notificaram nesta sessão (a notificação sai uma vez por disparo) */
+  alarmsNotified: 'alarms-notified',
 } as const;
 
 /**

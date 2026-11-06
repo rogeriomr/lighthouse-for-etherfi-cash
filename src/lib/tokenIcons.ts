@@ -22,6 +22,22 @@ const FILES: Record<string, string> = {
   zchf: 'zchf.svg',
   op: 'op.png',
   whype: 'whype.svg',
+  // desenhados pelo projeto (MIT, NOTICE.md): o ativo de base numa moeda, com um selo de "rende" (cofres Liquid) ou de
+  // "staked/wrapped". Não são a arte da ether.fi, que o projeto não redistribui
+  btc: 'btc.svg',
+  wbtc: 'btc.svg',
+  ebtc: 'ebtc.svg',
+  weeth: 'weeth.svg',
+  liquidusd: 'liquidusd.svg',
+  liquidreserve: 'liquidreserve.svg',
+  liquidbold: 'liquidbold.svg',
+  liquidrwa: 'liquidrwa.svg',
+  liquideur: 'liquideur.svg',
+  liquideth: 'liquideth.svg',
+  liquidbtc: 'liquidbtc.svg',
+  // a marca da ether.fi, do press kit oficial (NOTICE.md); o sETHFI leva o selo de "staked" do projeto
+  ethfi: 'ethfi.svg',
+  sethfi: 'sethfi.svg',
 };
 
 /** Endereço do ícone do símbolo, ou null. Parte do BASE_URL do build: funciona também num deploy em subpasta. */

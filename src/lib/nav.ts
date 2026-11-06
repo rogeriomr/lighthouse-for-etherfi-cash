@@ -1,5 +1,5 @@
 /** `start` ("Comece aqui", o guia de como usar com a própria conta) não entra na navegação principal */
-export type View = 'portfolio' | 'spending' | 'history' | 'subscriptions' | 'earnings' | 'statement' | 'insights' | 'start';
+export type View = 'portfolio' | 'spending' | 'history' | 'subscriptions' | 'earnings' | 'borrow' | 'statement' | 'insights' | 'start';
 /** As abas do Portfólio (o nome vem de quando elas eram da Conta): o resumo e as seções de cartões, depósito e conexão */
 export type AccountTab = 'summary' | 'cards' | 'deposit' | 'connect';
 
@@ -13,6 +13,7 @@ export const VIEW_SLUG: Record<View, string> = {
   history: 'history',
   subscriptions: 'subscriptions',
   earnings: 'earnings',
+  borrow: 'borrow',
   statement: 'activity',
   insights: 'insights',
   start: 'start',

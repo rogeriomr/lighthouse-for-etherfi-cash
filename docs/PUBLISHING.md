@@ -34,16 +34,20 @@ os objetos. Não existe "apagar depois": a única proteção confiável é confe
 
 O `.vercelignore` repete o critério para quem faz deploy pela CLI da Vercel, que **não lê** o `.gitignore`.
 
-## 3. Estado publicado (02/11/2026)
+## 3. Estado publicado (06/11/2026)
 
-- Repositório público `rogeriomr/lighthouse-for-etherfi-cash`; `main` na release **0.2.0** (tela Earnings, resumo
-  no Portfólio, `docs/ai/`, `AGENTS.md`), árvore limpa e upstream `origin/main` via SSH.
-- Releases com tag anotada e notas tiradas do `CHANGELOG.md`: `v0.1.0` (21/10/2026, `389c01e`) e `v0.2.0`
-  (02/11/2026, a mais recente). Tópicos do repositório e homepage (o demo) definidos.
+- Repositório público `rogeriomr/lighthouse-for-etherfi-cash`; `main` na release **0.3.0** (tela Empréstimo,
+  `#/borrow`), árvore limpa e upstream `origin/main` via SSH.
+- Releases com tag anotada e notas tiradas do `CHANGELOG.md`: `v0.1.0` (21/10/2026, `389c01e`), `v0.2.0`
+  (02/11/2026) e `v0.3.0` (06/11/2026, a mais recente).
+- A 0.3.0 abriu a primeira chamada para fora da ether.fi, com o OK do dono: os candles públicos da Coinbase Exchange
+  (`https://api.exchange.coinbase.com` na CSP), só depois de a pessoa ligar os gráficos de preço. O ícone do ETHFI usa
+  a marca do press kit oficial da ether.fi, também com o OK dele (`public/tokens/NOTICE.md`). Tópicos do repositório e homepage (o demo) definidos.
 - Demo em produção: <https://lighthouse-for-etherfi-cash.vercel.app>. O projeto na Vercel não tem integração Git; o
-  deploy é feito pela CLI (`vercel deploy --prod --yes`). Último deploy (02/11/2026, `65f08f7`) validado: HTTP 200,
-  mesmo bundle do build local, CSP/CORP presentes, `/callback` com `no-store` e 0 violação de CSP do app nas 8 telas em
-  1440 e 390 px (as únicas vieram do script que o antivírus da máquina injeta).
+  deploy é feito pela CLI (`vercel deploy --prod --yes`). Último deploy (06/11/2026, release 0.3.0) validado: HTTP 200,
+  mesmo bundle do build local, CSP/CORP presentes (com a Coinbase Exchange no `connect-src`), `/callback` com
+  `no-store` e 0 violação de CSP do app nas 9 telas em 1440 e 390 px, inclusive com os gráficos de preço ligados (as
+  únicas vieram do script que o antivírus da máquina injeta).
 - CI verde nos jobs `Node 22.23.4` e `Node 24.22.1` (typecheck, lint, build, `npm run check` e `npm run privacy`).
 - `main` protegida: os dois checks são obrigatórios, sem force-push, sem deleção, histórico linear e conversas
   resolvidas; `enforce_admins: true` desde 02/11/2026 (decisão do dono, seção 4): a regra vale também para o admin,
@@ -56,7 +60,7 @@ O `.vercelignore` repete o critério para quem faz deploy pela CLI da Vercel, qu
   quando eles subirem para o minimatch 11.
 - `npm run privacy`: **0 GRAVE, 0 aviso fora da allowlist**, comparando **263 arquivos publicáveis** com **5.175
   valores** sensíveis dos dados reais.
-- 8 prints do demo em `docs/screenshots/` (desktop 1366×900, mobile 780×1688), usados no README.
+- 10 prints do demo em `docs/screenshots/` (desktop 1366×900, mobile 780×1688; os da tela Empréstimo são recortes de 1440 px), usados no README.
 - Sem `.env.local`, `fixtures/live/` ou `.pull-client.json`; dados reais em `%USERPROFILE%\lighthouse-data`.
 - **Pendente:** ativar 2FA/passkey na conta e mover o projeto para fora do OneDrive.
 - O primeiro push usou uma deploy key de escrita (`lighthouse deploy`, chave em `~/.ssh/lighthouse_ed25519`) porque
@@ -83,6 +87,7 @@ O `.vercelignore` repete o critério para quem faz deploy pela CLI da Vercel, qu
 | 21/10/2026 | Baseline Node.js elevado para 22.23.4 (CI 24.22.1) após os releases de segurança |
 | 02/11/2026 | Commit `65f08f7` (Earnings, `docs/ai/`, `AGENTS.md`): push para `main`, CI verde nos dois Nodes e deploy em produção |
 | 02/11/2026 | `enforce_admins` ligado; release 0.2.0 por pull request com CI verde; tags e releases `v0.1.0` e `v0.2.0` |
+| 06/11/2026 | Release 0.3.0 (tela Empréstimo) por pull request com CI verde; tag e release `v0.3.0`; deploy em produção |
 | Pendente | 2FA/passkey e saída do OneDrive |
 
 ## 4. Decisões que são suas (e que o código não decide)

@@ -97,6 +97,7 @@ const SHAPES: Record<View, () => ReactNode> = {
     </>
   ),
   // "Comece aqui": título, o diagrama e os cartões dos caminhos
+  borrow: () => <Kpis chart list />,
   start: () => (
     <>
       <Title />

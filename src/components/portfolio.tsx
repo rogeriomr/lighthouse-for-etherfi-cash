@@ -319,7 +319,7 @@ const initials = (asset: string) => (asset.replace(/[^\p{L}\p{N}]/gu, '').slice(
  * tinta da classe. Decorativo (alt vazio): o nome do ativo está logo ao lado. Largura e altura fixas: nada se mexe
  * quando a imagem chega.
  */
-function AssetChip({ asset, tint }: { asset: string; tint: string }) {
+export function AssetChip({ asset, tint }: { asset: string; tint: string }) {
   const src = tokenIcon(asset);
   const [failed, setFailed] = useState(false);
   if (src && !failed) {

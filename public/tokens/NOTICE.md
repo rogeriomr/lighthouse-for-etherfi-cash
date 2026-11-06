@@ -31,10 +31,15 @@ All files were downloaded on 2026-10-19 and are served from this site. They are 
 | `qqqx.svg` | wQQQx (QQQx) | xStocks / Backed | <https://xstocks-metadata.backed.fi/logos/tokens/QQQx.svg> | Same as SPYx. The upstream file is identical to TBLLx's. |
 | `tbllx.svg` | wTBLLx (TBLLx) | xStocks / Backed | <https://xstocks-metadata.backed.fi/logos/tokens/TBLLx.svg> | Same as SPYx. |
 | `paxgy.png` | PAXGy | Paxos Labs | <https://cdn.prod.website-files.com/69cab1dafd4174ab4df7adc2/6a958a4e2738bfc4931ed3e1_icon-token.png>, shown as the PAXGy token on <https://www.paxgy.com/>, scaled from 256 px to 128 px | No published terms found. |
+| `ethfi.svg`, `sethfi.svg` | ETHFI, sETHFI | ether.fi | The ether.fi mark, `ether.fi-logo.svg` from the official press kit `ether.fi-presskit.zip` (dated 2023-11-02), linked on <https://etherfi.gitbook.io/etherfi/resources/partnerships/press-kit>; downloaded 2026-11-05 | The press kit publishes no terms; the mark is used unaltered (shapes and gradient) at 87 % scale on a dark circle, only to identify the token. `sethfi.svg` adds this project's own "staked" badge. |
 | `whype.svg` | WHYPE | Hyperliquid | Green "blob" mark from the brand kit ZIP "Hyperliquid SVG format" on <https://hyperliquid.gitbook.io/hyperliquid-docs/brand-kit>, placed at 80 % scale on a circle in the kit's dark color `#011916` | No published terms found. |
 
 USDC and EURC are trademarks of Circle Internet Group, Inc. and/or its affiliates. All other trademarks are the property of their respective owners.
 
+## Drawn by this project
+
+`btc.svg`, `ebtc.svg`, `weeth.svg`, `liquidusd.svg`, `liquidreserve.svg`, `liquidbold.svg`, `liquidrwa.svg`, `liquideur.svg`, `liquideth.svg` and `liquidbtc.svg` were drawn for Lighthouse (2026-11-05) and are covered by the project's MIT license. Each one is a plain coin with the asset's base glyph (the bitcoin "₿", the ether diamond, "$", "€", a lightning bolt or a columned building) and, where it applies, a small badge: an up arrow for a Liquid yield vault, a circular arrow for a staked or wrapped token. They are generic pictures of the asset, **not** the issuers' logos: the official press kit has no artwork for these tokens.
+
 ## ether.fi names and marks
 
-The project does not redistribute ether.fi artwork. ether.fi, weETH, eBTC, eUSD, ETHFI, beHYPE, liquidETH, liquidBTC, liquidUSD and frxUSD are trademarks of ether.fi or its affiliates, used only in text to describe compatibility; this project is independent and not affiliated with or endorsed by ether.fi.
+The only ether.fi artwork in the project is the ether.fi mark on the ETHFI and sETHFI icons (see the table above), used to identify the token. ether.fi, weETH, eBTC, eUSD, ETHFI, beHYPE, liquidETH, liquidBTC, liquidUSD and frxUSD are trademarks of ether.fi or its affiliates, used to describe compatibility; this project is independent and not affiliated with or endorsed by ether.fi.
