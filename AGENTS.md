@@ -27,7 +27,7 @@ A read-only dashboard for an ether.fi Cash account that runs entirely in the bro
 | `src/components/` | Panels and parts; `earnings*.tsx` are the Earnings screen and its summary on Portfolio |
 | `src/lib/earnings.ts` | The Earnings engine (pure functions): yield, cashback, allocation, milestones, `COVERAGE_TARGETS` |
 | `src/lib/earningsWhatIf.ts` · `earningsChanges.ts` · `earningsReport.ts` | Scenarios, "what changed" with its thresholds, the text and JSON for an AI |
-| `src/lib/borrow.ts` · `src/lib/prices.ts` | The Borrow engine (loans grouped by currency, liquidation and attention prices, yield vs. interest, the 25/50/75/100% "paid" marks, alarms) with ether.fi's published market parameters; the opt-in Coinbase Exchange candles |
+| `src/lib/borrow.ts` · `src/lib/prices.ts` | The Borrow engine (loans grouped by currency, liquidation and attention prices, yield vs. interest, the projection of what the vault earns against what you owe with its 5–100% marks and the profit past 100%, alarms) with ether.fi's published market parameters; the opt-in Coinbase Exchange candles |
 | `src/lib/insights/cashbackPlans.ts` | Public cashback bands per plan, with source and date |
 | `src/lib/subscriptions.ts` · `src/lib/insights/priceBook.ts` | Subscription detection and public prices |
 | `src/lib/storage.ts` | Everything kept in the browser (`lighthouse:v1:*`) |

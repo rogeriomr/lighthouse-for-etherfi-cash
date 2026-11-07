@@ -9,7 +9,7 @@ import { enrichDataset } from '../src/lib/enrich.ts';
 import { bundleFromFiles, datasetFromBundle } from '../src/lib/rawFiles.ts';
 import {
   accountCollateral, accountPosition, applyShock, debtGroups, DEFAULT_BORROW_PREFS, evaluateAlarms, HF, hfCrossings, jointDropTrigger, MARKET_ASSETS, marketAsset,
-  newCollateralLine, netPoints, OBSERVED_RATES, SAMPLE_BORROW_COLLATERAL, scenarioPosition, cheaperSameCurrency, PERIOD_YEARS, paidMonth, payoff, priceTrigger, project, riskLevel, summarize, totalDebt, validateAlarm, validateBorrowPrefs, volatileUnderlyings,
+  newCollateralLine, OBSERVED_RATES, SAMPLE_BORROW_COLLATERAL, scenarioPosition, cheaperSameCurrency, PERIOD_YEARS, leftOver, paidCrossing, paidMonth, paidShare, payoff, priceTrigger, project, riskLevel, summarize, totalDebt, validateAlarm, validateBorrowPrefs, volatileUnderlyings,
   type BorrowPosition,
 } from '../src/lib/borrow.ts';
 import { validateCandles } from '../src/lib/prices.ts';
@@ -75,14 +75,28 @@ const long = project(classic, { monthlySpend: 0, monthlyCashback: 0, spendOnDebt
 const marks = [0.25, 0.5, 0.75, 1].map((share) => paidMonth(long, share, false));
 check('marcas: 25% em 2 meses, 50% em 4, 75% em 6, 100% em 8', JSON.stringify(marks) === JSON.stringify([2, 4, 6, 8]), JSON.stringify(marks));
 check('marcas: em ordem (cada parte nunca vem antes da menor)', marks.every((x, i) => i === 0 || (x ?? 0) >= (marks[i - 1] ?? 0)));
-const net = netPoints(long.slice(0, 13));
-check('gráfico: o azul é rendimento − juros e a linha é o emprestado, reta', near(net[12].cumYield, long[12].cumYield - long[12].cumInterest, 1e-9) && net.every((pt) => pt.debt === 300));
-check('gráfico: "tudo pago" pelo lucro = o rendimento somando o principal + juros (mesmo mês)', paidMonth(long, 1, false) === long.slice(1).find((pt) => pt.cumYield >= pt.debt)?.month);
+check('gráfico: a linha é o que se deve (emprestado + juros acumulados), e sobe', long.slice(0, 13).every((pt) => near(pt.debt, 300 + pt.cumInterest, 1e-9)) && long[12].debt > long[1].debt && long[1].debt > 300);
+check('gráfico: "% pago" = rendido ÷ devido', near(paidShare(long[12], false), long[12].cumYield / long[12].debt, 1e-12) && paidShare({ ...long[0], debt: 0 }, false) === 0);
+check('gráfico: 100% pelo rendido ÷ devido = o mês em que o lucro (rendimento − juros) soma o emprestado', paidMonth(long, 1, false) === long.slice(1).find((pt) => pt.cumYield - pt.cumInterest >= 300)?.month);
 const pts = project(classic, { monthlySpend: 0, monthlyCashback: 0, spendOnDebt: false }, 12);
 check('projeção: 13 pontos, mês 0 = hoje', pts.length === 13 && pts[0].debt === 300 && pts[0].cumYield === 0);
 check('projeção: 12 meses de rendimento ≈ 475 (composto mês a mês = APY)', near(pts[12].cumYield, 475, 0.05));
 check('projeção: dívida em 12 meses ≈ 310,65', near(pts[12].debt, 310.65, 0.02));
 check('projeção: HF sobe sem gasto novo (rendimento > juros)', pts[12].hf > pts[0].hf);
+
+// cenário 2 com APY de 6%: as marcas ficam onde a curva cruza a fração, e a lista diz o mês em que ela já passou
+const sixPos: BorrowPosition = { collateral: [newCollateralLine(m('liquidUSD'), 50_000, 6)], debts: [{ asset: 'USDT', amount: 5_000, apr: 3.55 }] };
+const six = project(sixPos, { monthlySpend: 0, monthlyCashback: 0, spendOnDebt: false }, 600);
+const sixMarks = [0.05, 0.1, 0.25, 0.5, 0.75, 1].map((share) => ({ share, c: paidCrossing(six, share, false) }));
+check('marcas (50 mil a 6%, 5 mil a 3,55%): 5% no mês 2, 10% no 3, 25% no 6, 50% no 11, 75% no 16, 100% no 21', JSON.stringify(sixMarks.map((x) => x.c?.month)) === JSON.stringify([2, 3, 6, 11, 16, 21]), JSON.stringify(sixMarks.map((x) => x.c?.month)));
+const lerpAt = (pts: readonly { cumYield: number; debt: number }[], t: number, k: 'cumYield' | 'debt') => pts[Math.floor(t)][k] * (1 - (t - Math.floor(t))) + pts[Math.min(pts.length - 1, Math.floor(t) + 1)][k] * (t - Math.floor(t));
+check('marcas: o instante da marca fica entre o mês anterior e o mês da lista, e ali o rendido vale a fração do devido', sixMarks.every(({ share, c }) => c !== null && c.at > c.month - 1 && c.at <= c.month && near(lerpAt(six, c.at, 'cumYield') / lerpAt(six, c.at, 'debt'), share, 1e-9)));
+check('marcas: no mês da lista o "% pago" já passou da fração; no anterior, ainda não (o 5% não mostra 9% no ponto)', sixMarks.every(({ share, c }) => c !== null && paidShare(six[c.month], false) >= share && paidShare(six[c.month - 1], false) < share));
+check('marcas: o 5% cruza logo depois do 1º mês (≈ 1,03), não no ponto do 2º, que já está em ≈ 9,7%', near(sixMarks[0].c?.at, 1.03, 0.005) && near(paidShare(six[2], false), 0.097, 0.001));
+check('dívida capitaliza: em 12 meses, 5.000 × 1,0355 = 5.177,50 (a taxa do app já inclui a capitalização)', near(six[12].debt, 5177.5, 0.01) && near(six[12].cumInterest, 177.5, 0.01));
+check('sobra: antes dos 100% é negativa, no mês dos 100% já é ≥ 0 e é rendido − devido', leftOver(six[20], false) < 0 && leftOver(six[21], false) >= 0 && near(leftOver(six[30], false), six[30].cumYield - six[30].debt, 1e-9));
+check('ao longo do tempo: o poder de empréstimo cresce com a garantia (valor × Product LTV, 0,8 no liquidUSD)', near(six[0].borrowPower, 40_000, 1e-6) && near(six[12].borrowPower, six[12].collateralUsd * 0.8, 1e-6) && six[12].borrowPower > six[0].borrowPower);
+check('ao longo do tempo: a garantia é o valor de hoje + o rendido (preços parados)', near(six[21].collateralUsd, 50_000 + six[21].cumYield, 1e-6));
 
 // juros maiores que o rendimento: nunca soma
 const upside: BorrowPosition = { collateral: [newCollateralLine(m('liquidUSD'), 400, 2)], debts: [{ asset: 'USDT', amount: 300, apr: 12 }] };

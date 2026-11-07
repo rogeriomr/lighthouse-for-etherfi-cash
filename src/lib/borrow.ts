@@ -94,7 +94,12 @@ export type DebtGroup = 'usd' | 'eth' | 'eur';
 export const DEBT_GROUPS: readonly DebtGroup[] = ['usd', 'eth', 'eur'];
 export const DEBT_GROUP_OF: Record<DebtAsset, DebtGroup> = { USDT: 'usd', USDC: 'usd', EURC: 'eur', WETH: 'eth' };
 
-/** Taxa de cada empréstimo (APR, %) que o app da ether.fi mostrava em 05/11/2026. Variável: muda com o uso do mercado. */
+/**
+ * Taxa de cada empréstimo (% ao ano) que o app da ether.fi mostrava em 05/11/2026. Variável: muda com o uso do mercado.
+ * A central de ajuda (artigo 326983, "Borrow Mode vs Direct Pay") chama de APY e diz que ela já inclui a capitalização:
+ * o saldo devedor cresce a cada segundo, juro sobre juro. Por isso a projeção compõe mês a mês a (1 + taxa)^(1/12) e,
+ * em 12 meses, a dívida cresce exatamente a taxa.
+ */
 export const OBSERVED_RATES = { date: '2026-11-05', rates: { USDT: 3.55, USDC: 4.1, EURC: 3.38, WETH: 1.48 } as Record<DebtAsset, number> } as const;
 
 /** Candles para o gráfico (Coinbase Exchange, pública), por ativo de referência. */
@@ -457,6 +462,8 @@ export interface ProjectionInput {
 export interface ProjectionPoint {
   month: number;
   collateralUsd: number;
+  /** Σ valor × Product LTV naquele mês: a garantia cresce pelo rendimento e o poder de empréstimo junto */
+  borrowPower: number;
   debt: number;
   hf: number;
   /** Rendimento acumulado da garantia desde hoje */
@@ -477,6 +484,7 @@ export function project(p: BorrowPosition, input: ProjectionInput, months: numbe
   const values = p.collateral.map((c) => c.valueUsd);
   const monthlyRate = p.collateral.map((c) => Math.pow(1 + c.apy / 100, 1 / 12) - 1);
   const cfs = p.collateral.map((c) => c.cf);
+  const ltvs = p.collateral.map((c) => c.productLtv);
   const debts = p.debts.map((d) => ({ amount: Math.max(0, d.amount), rate: Math.pow(1 + d.apr / 100, 1 / 12) - 1, usd: DEBT_UNDERLYING[d.asset] === 'usd' }));
   if (input.spendOnDebt && input.monthlySpend > 0 && !debts.some((d) => d.usd)) {
     debts.push({ amount: 0, rate: Math.pow(1 + (input.spendApr ?? OBSERVED_RATES.rates.USDT) / 100, 1 / 12) - 1, usd: true });
@@ -488,7 +496,8 @@ export function project(p: BorrowPosition, input: ProjectionInput, months: numbe
     const collateralUsd = sum(values);
     const risk = sum(values.map((v, i) => v * cfs[i]));
     const debt = sum(debts.map((d) => d.amount));
-    return { month, collateralUsd, debt, hf: debt > 0 ? risk / debt : Infinity, cumYield, cumInterest, cumCashback };
+    const borrowPower = sum(values.map((v, i) => v * ltvs[i]));
+    return { month, collateralUsd, borrowPower, debt, hf: debt > 0 ? risk / debt : Infinity, cumYield, cumInterest, cumCashback };
   };
   const out: ProjectionPoint[] = [point(0)];
   for (let m = 1; m <= n; m++) {
@@ -512,28 +521,54 @@ export function project(p: BorrowPosition, input: ProjectionInput, months: numbe
   return out;
 }
 
+/** O que o cofre rendeu desde hoje (bruto, acumulado) e, com `withCashback`, o cashback por cima. */
+export function earnedAt(pt: ProjectionPoint, withCashback: boolean): number {
+  return pt.cumYield + (withCashback ? pt.cumCashback : 0);
+}
+
+/** Quanto do que se deve (o emprestado + os juros, que entram na dívida) o rendido cobre: 0,58 = 58%. 0 sem dívida. */
+export function paidShare(pt: ProjectionPoint, withCashback: boolean): number {
+  return pt.debt > 0 ? earnedAt(pt, withCashback) / pt.debt : 0;
+}
+
 /**
- * "Em quanto tempo o rendimento paga X% da dívida": com a dívida de hoje parada (sem gasto novo), o primeiro mês em que
- * o lucro da garantia (o rendimento menos os juros do empréstimo, acumulados) e, com `withCashback`, o cashback somam
- * `share` do valor emprestado. Para `share` = 1 é o mesmo que o rendimento somar o principal mais os juros. null: não
- * chega em 50 anos. É uma régua, não um plano: o rendimento fica no cofre e a dívida só cai quando alguém paga.
+ * Depois dos 100%: o que sobraria se o rendido pagasse o que se deve naquele mês (rendido − devido). Negativo antes do
+ * cruzamento. Também é uma régua: o rendimento fica no cofre e a dívida só cai quando alguém paga.
  */
-export function paidMonth(points: readonly ProjectionPoint[], share: number, withCashback: boolean): number | null {
-  const principal = points[0]?.debt ?? 0;
-  for (const pt of points) {
-    if (pt.month === 0) continue;
-    if (pt.cumYield - pt.cumInterest + (withCashback ? pt.cumCashback : 0) >= share * principal) return pt.month;
+export function leftOver(pt: ProjectionPoint, withCashback: boolean): number {
+  return earnedAt(pt, withCashback) - pt.debt;
+}
+
+export interface PaidCrossing {
+  /** O primeiro mês da projeção em que o rendido já cobre `share` do devido: o da lista, da tabela e do "em 21 meses" */
+  month: number;
+  /** O instante, em meses fracionados, em que a curva cruza `share` (entre o mês anterior e `month`): onde o gráfico desenha a marca */
+  at: number;
+}
+
+/**
+ * "Em quanto tempo o rendimento cobre X% do que você deve": com a dívida de hoje parada (sem gasto novo), quando o que o
+ * cofre rendeu (bruto, acumulado) e, com `withCashback`, o cashback chegam a `share` do devido naquele mês (o principal
+ * mais os juros, capitalizados). Para `share` = 1 é o mesmo que o lucro (rendimento − juros) somar o principal. `at`
+ * interpola entre os dois meses vizinhos, como as retas do gráfico: ali o rendido vale exatamente `share` do devido.
+ * null: não chega no horizonte. É uma régua, não um plano: o rendimento fica no cofre e a dívida só cai quando alguém paga.
+ */
+export function paidCrossing(points: readonly ProjectionPoint[], share: number, withCashback: boolean): PaidCrossing | null {
+  const gap = (pt: ProjectionPoint) => earnedAt(pt, withCashback) - share * pt.debt;
+  for (let i = 1; i < points.length; i++) {
+    const g1 = gap(points[i]);
+    if (points[i].debt > 0 && g1 >= 0) {
+      const g0 = gap(points[i - 1]);
+      const t = g0 >= 0 || g1 === g0 ? 1 : -g0 / (g1 - g0);
+      return { month: points[i].month, at: points[i - 1].month + t * (points[i].month - points[i - 1].month) };
+    }
   }
   return null;
 }
 
-/**
- * A projeção como o gráfico mostra: o azul é o lucro da garantia (rendimento − juros, acumulados) e a linha é o valor
- * emprestado, reta (os juros já saíram do azul). Onde o azul alcança a linha, o lucro pagou o empréstimo.
- */
-export function netPoints(points: readonly ProjectionPoint[]): ProjectionPoint[] {
-  const principal = points[0]?.debt ?? 0;
-  return points.map((p) => ({ ...p, cumYield: p.cumYield - p.cumInterest, debt: principal }));
+/** O mês de `paidCrossing` (o da lista "50% · mar. 2027"). */
+export function paidMonth(points: readonly ProjectionPoint[], share: number, withCashback: boolean): number | null {
+  return paidCrossing(points, share, withCashback)?.month ?? null;
 }
 
 export interface Payoff {
@@ -549,7 +584,7 @@ export function payoff(p: BorrowPosition, monthlyCashback: number): Payoff {
   return { months: paidMonth(pts, 1, false), monthsWithCashback: monthlyCashback > 0 ? paidMonth(pts, 1, true) : paidMonth(pts, 1, false) };
 }
 
-/** As marcas do gráfico do "quanto já foi pago": o mês em que o lucro da garantia chega a cada parte do emprestado. */
+/** As marcas do gráfico do "quanto já foi pago": quando o que o cofre rendeu chega a cada parte do que você deve. */
 export const PAID_MARKS = [0.05, 0.1, 0.25, 0.5, 0.75, 1] as const;
 
 export interface HfCrossings {
