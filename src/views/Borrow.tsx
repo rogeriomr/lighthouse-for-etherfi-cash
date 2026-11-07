@@ -17,8 +17,7 @@ import {
   jointDropTrigger,
   marketAsset,
   newCollateralLine,
-  netPoints,
-  paidMonth,
+  paidCrossing,
   priceTrigger,
   project,
   summarize,
@@ -35,10 +34,10 @@ import { dateShort, nb, num, pctSigned } from '../lib/format';
 import { useLocale, useTr } from '../state/locale';
 import { useStore } from '../state/store';
 import { useBorrowPrefs } from '../state/borrowPrefs';
-import { useEarnings } from '../components/earningsData';
 import { useAlarmStates, useRealBorrow, alarmText } from '../components/borrowData';
 import { BorrowPanel, CarryPanel, CollateralPanel, HeroStats, type BorrowTip } from '../components/borrowParts';
 import { ProjectionChart } from '../components/borrowCharts';
+import { TimeTravel } from '../components/borrowTime';
 import { PriceCard } from '../components/borrowPrice';
 import { AlarmsPanel } from '../components/borrowAlarms';
 import { Badge, Button, ExternalLink, Panel, PanelTitle, Segmented } from '../components/ui';
@@ -59,16 +58,16 @@ export function BorrowView({ onNavigate }: { onNavigate: Navigate }) {
   const { source, loading, refresh, isSample } = useStore();
   const [prefs, save] = useBorrowPrefs();
   const real = useRealBorrow();
-  const e = useEarnings();
   const states = useAlarmStates();
 
   // a simulação: cada parte mexida sobrepõe a conta; null = como está
   const [collateral, setCollateral] = useState<CollateralLine[] | null>(null);
   const [debtEdit, setDebtEdit] = useState<{ asset: DebtAsset; amount: number }[] | null>(null);
-  const [spendEdit, setSpendEdit] = useState<number | null>(null);
   const [shock, setShock] = useState<Shock>({});
   const [horizonEdit, setHorizon] = useState<Horizon | null>(null);
   const [scenario, setScenario] = useState<ScenarioId>('account');
+  // o mês de "ao longo do tempo"; null = hoje, sem linha fixa no gráfico
+  const [pinEdit, setPin] = useState<number | null>(null);
 
   // a taxa de cada dívida vem sempre das preferências (a do app de 05/11 ou a da pessoa)
   const debts: DebtLine[] = useMemo(
@@ -82,20 +81,22 @@ export function BorrowView({ onNavigate }: { onNavigate: Navigate }) {
   const shockOn = Object.values(shock).some((m) => m !== undefined && m !== 1);
   const simulating = collateral !== null || debtEdit !== null || shockOn;
 
-  // o gasto do cartão e o cashback vêm do motor de Ganhos (a média do cartão e a taxa do plano)
-  // o gasto vem da média do cartão (o motor de Ganhos); a taxa é a desta tela, 3% por padrão, simples de propósito
-  const cardMonthly = e.cashback.base.card.monthly ?? e.cashback.base.monthly ?? 0;
-  const spend = spendEdit ?? Math.round(cardMonthly * 100) / 100;
-  const monthlyCashback = (spend * prefs.cashbackPct) / 100;
 
   // o "quanto já foi pago": a projeção longa dá o mês de cada marca; o gráfico mostra a janela escolhida
-  const long = useMemo(() => project(shocked, { monthlySpend: 0, monthlyCashback, spendOnDebt: false }, MAX_MONTHS), [shocked, monthlyCashback]);
-  const paidMonths = useMemo(() => Object.fromEntries(PAID_MARKS.map((m) => [m, s.debt > 0 ? paidMonth(long, m, false) : null])) as Record<number, number | null>, [long, s.debt]);
+  const long = useMemo(() => project(shocked, { monthlySpend: 0, monthlyCashback: 0, spendOnDebt: false }, MAX_MONTHS), [shocked]);
+  // o mês de cada marca (lista, tabela, "em 21 meses") e o instante em que a curva cruza a fração (onde o gráfico a desenha)
+  const crossings = useMemo(() => PAID_MARKS.flatMap((share) => {
+    const c = s.debt > 0 ? paidCrossing(long, share, false) : null;
+    return c ? [{ share, month: c.month, at: c.at }] : [];
+  }), [long, s.debt]);
+  const paidMonths = useMemo(() => Object.fromEntries(PAID_MARKS.map((m) => [m, crossings.find((c) => c.share === m)?.month ?? null])) as Record<number, number | null>, [crossings]);
   const lastMark = paidMonths[1] ?? 0;
   const autoHorizon: Horizon = lastMark > 60 ? 120 : lastMark > 24 ? 60 : lastMark > 12 ? 24 : 12;
   const horizon = horizonEdit ?? autoHorizon;
-  // o gráfico: o lucro da garantia (rendimento − juros) contra o valor emprestado, reto
-  const points = useMemo(() => netPoints(long.slice(0, horizon + 1)), [long, horizon]);
+  // o gráfico: o que o cofre rendeu (bruto) contra o que você deve (o emprestado + os juros, que entram na dívida)
+  const points = useMemo(() => long.slice(0, horizon + 1), [long, horizon]);
+  const timeMonth = Math.min(horizon, pinEdit ?? 0);
+  const pinned = pinEdit === null ? null : timeMonth;
 
   const vols = volatileUnderlyings(base);
   const share = (u: Underlying) => (s.collateralUsd > 0 ? base.collateral.filter((c) => c.underlying === u).reduce((a, c) => a + c.valueUsd, 0) / base.collateral.reduce((a, c) => a + c.valueUsd, 0) : 0);
@@ -113,7 +114,6 @@ export function BorrowView({ onNavigate }: { onNavigate: Navigate }) {
   const reset = () => {
     setCollateral(null);
     setDebtEdit(null);
-    setSpendEdit(null);
     setShock({});
     setScenario('account');
   };
@@ -165,8 +165,8 @@ export function BorrowView({ onNavigate }: { onNavigate: Navigate }) {
           </h1>
           <p className="mt-2 text-sm text-muted">
             {tr(
-              'Whether the collateral’s yield pays for the loan, how long until it has paid it all, and how far a price drop would be from liquidation. Change any number to simulate.',
-              'Se o rendimento da garantia paga o empréstimo, em quanto tempo ele já pagou tudo e a que distância uma queda de preço ficaria da liquidação. Mude qualquer número para simular.',
+              'Whether the collateral’s yield covers the loan’s interest, how long until its profit would cover the loan, and how far a price drop would be from liquidation. Change any number to simulate.',
+              'Se o rendimento da garantia cobre os juros do empréstimo, em quanto tempo o lucro dela cobriria o empréstimo e a que distância uma queda de preço ficaria da liquidação. Mude qualquer número para simular.',
             )}
           </p>
         </div>
@@ -252,14 +252,17 @@ export function BorrowView({ onNavigate }: { onNavigate: Navigate }) {
         chart={
           <ProjectionChart
             points={points}
-            marks={PAID_MARKS.flatMap((m) => (paidMonths[m] !== null && paidMonths[m] !== undefined ? [{ share: m, month: paidMonths[m]! }] : []))}
+            marks={crossings}
             showCashback={false}
             start={new Date()}
             locale={locale}
-            label={tr('The collateral’s profit (yield minus loan interest) against what you borrowed, month by month', 'O lucro da garantia (rendimento menos juros) contra o que você pegou emprestado, mês a mês')}
+            label={tr('What the vault has earned against what you owe (borrowed plus interest), month by month', 'O que o cofre rendeu contra o que você deve (o emprestado mais os juros), mês a mês')}
+            pinned={pinned}
+            onPick={setPin}
           />
         }
       />
+
 
       <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-2">
         <CollateralPanel
@@ -276,8 +279,6 @@ export function BorrowView({ onNavigate }: { onNavigate: Navigate }) {
         />
         <BorrowPanel
           debts={debts}
-          details={prefs.details}
-          onDetails={(v) => save({ ...prefs, details: v })}
           accountAsset={prefs.debtAsset}
           onAccountAsset={(a) => save({ ...prefs, debtAsset: a })}
           accountLoan={accountLoan}
@@ -291,18 +292,15 @@ export function BorrowView({ onNavigate }: { onNavigate: Navigate }) {
           aprCustom={(asset) => prefs.apr[asset] !== undefined}
           onAdd={(asset) => {
             setDebtEdit([...debtRows(), { asset, amount: 100 }]);
-            if (!prefs.details) save({ ...prefs, details: true });
           }}
           onRemove={(asset) => setDebtEdit(debtRows().filter((d) => d.asset !== asset))}
-          spend={spend}
-          onSpend={setSpendEdit}
-          cashbackPct={prefs.cashbackPct}
-          onCashbackPct={(n) => save({ ...prefs, cashbackPct: n })}
-          monthlyCashback={monthlyCashback}
           s={s}
           tip={tip}
         />
       </div>
+      {s.debt > 0 ? (
+        <TimeTravel points={points} marks={crossings} month={timeMonth} onMonth={setPin} start={new Date()} locale={locale} />
+      ) : null}
 
       {vols.length ? (
         <section aria-labelledby="borrow-prices" className="space-y-4">
@@ -403,10 +401,6 @@ export function BorrowView({ onNavigate }: { onNavigate: Navigate }) {
           {' · '}
           <ExternalLink href={HF_SOURCE} className="hover:text-muted">{tr('attention and liquidation limits', 'limites de atenção e liquidação')}</ExternalLink>
           {nb(tr(` · loan rates seen in the app on ${dateShort(OBSERVED_RATES.date)}`, ` · taxas vistas no app em ${dateShort(OBSERVED_RATES.date)}`))}
-          {' · '}
-          <button type="button" onClick={() => onNavigate('earnings')} className="tap cursor-pointer underline decoration-dotted underline-offset-2 hover:text-muted">
-            {tr('cashback comes from Earnings', 'o cashback vem de Ganhos')}
-          </button>
         </p>
       </div>
     </div>

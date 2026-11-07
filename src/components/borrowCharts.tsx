@@ -9,8 +9,8 @@ import { useTr } from '../state/locale';
 import { EARN_COLORS } from './earningsData';
 import { AsTable } from './charts';
 
-// Os dois gráficos da tela Empréstimo, em SVG medido (o texto não estica): o "quanto o rendimento já pagou" da dívida,
-// com marcas de 25/50/75/100% que a pessoa liga e desliga, e os candles de um ativo com a faixa de atenção e a de
+// Os dois gráficos da tela Empréstimo, em SVG medido (o texto não estica): o que o cofre rendeu contra o que você deve
+// (o emprestado + os juros), com marcas de 5/10/25/50/75/100%, e os candles de um ativo com a faixa de atenção e a de
 // liquidação. Mesmo vocabulário dos outros gráficos do app: grade fina, eixo com a unidade escrita uma vez, tabela
 // gêmea para quem não vê o desenho.
 
@@ -18,6 +18,8 @@ export const BORROW_COLORS = {
   yield: EARN_COLORS.liquidusd,
   cashback: EARN_COLORS.cashback,
   debt: '#f3f0e8',
+  /** Depois dos 100%: a faixa entre o rendido e o devido, o lucro depois de pagar (o verde de "bom" do tema) */
+  leftOver: 'var(--color-good)',
 } as const;
 
 /** Largura do contêiner, medida (o SVG desenha na escala 1:1 e o texto fica com o tamanho certo). */
@@ -66,59 +68,144 @@ export function durationText(months: number, locale: Locale): string {
 
 export interface PaidMark {
   share: number;
+  /** O mês da lista, da tabela e do "em 21 meses": o primeiro em que o rendido já passou da fração */
   month: number;
+  /** Onde a curva cruza a fração, em meses fracionados (entre `month` − 1 e `month`): onde a marca é desenhada */
+  at: number;
 }
 
+/** "9% pago": arredonda para baixo, para nenhum mês dizer 5% antes do mês em que a marca de 5% chega. */
+const paidPct = (ratio: number) => Math.max(0, Math.min(100, Math.floor(ratio * 100 + 1e-9)));
+/** Coberto: o rendido já passou do que se deve (daí em diante a tela fala do lucro, não de "% pago"). */
+const covered = (earned: number, debt: number) => debt > 0 && earned >= debt;
 /**
- * O lucro da garantia (área azul: o rendimento menos os juros do empréstimo, acumulados), com o cashback por cima quando
- * ligado (área aqua), contra o valor emprestado (linha clara, reta: os juros já saíram do azul). Cada marca ligada vira uma linha vertical no mês em que o somado chega
- * àquela parte do devido ("50% · mar. 2027"); a de 100% diz o mês e quanto tempo falta ("Tudo pago · abr. 2029 · em 2
- * anos e 5 meses").
+ * Depois dos 100%, o "% pago" continua como "% de lucro": o lucro (rendido − devido) sobre o que se deve, para baixo como
+ * o "% pago" (147% do devido = "+47% de lucro"; no mês do cruzamento, +0%).
  */
-export function ProjectionChart({ points, marks, showCashback, start, locale, label }: {
+export const profitPct = (earned: number, debt: number) => (debt > 0 ? Math.max(0, Math.floor((earned / debt - 1) * 100 + 1e-9)) : 0);
+
+/**
+ * O que o cofre rendeu (área azul: o rendimento bruto, acumulado), com o cashback por cima quando ligado (área aqua),
+ * contra o que você deve (linha clara tracejada: o emprestado mais os juros, que entram na dívida e capitalizam; sobe um
+ * pouco todo mês). Cada marca ligada vira uma linha vertical no instante em que o rendido cruza aquela parte do devido,
+ * com o ponto exatamente na altura da fração (`at`, interpolado entre os dois meses vizinhos); a lista embaixo e a tabela
+ * dizem o mês em que ela chega ("50% · mar. 2027"), e a de 100% quanto tempo falta ("em 2 anos e 5 meses"). As marcas
+ * precisam vir da mesma conta do desenho: com `showCashback`, calculadas com o cashback.
+ */
+export function ProjectionChart({ points, marks, showCashback, start, locale, label, pinned = null, onPick }: {
   points: readonly ProjectionPoint[];
   marks: readonly PaidMark[];
   showCashback: boolean;
   start: Date;
   locale: Locale;
   label: string;
+  /** O mês escolhido em "ao longo do tempo": uma linha fixa no gráfico (null = nenhuma) */
+  pinned?: number | null;
+  /** Clicar no gráfico escolhe aquele mês em "ao longo do tempo" */
+  onPick?: (month: number) => void;
 }) {
   const tr = useTr();
   const box = useRef<HTMLDivElement>(null);
   const width = useWidth(box);
-  const [hover, setHover] = useState<number | null>(null);
+  // a posição do ponteiro, em px dentro do SVG: vira o mês mais perto ou, perto de uma marca, a própria marca
+  const [hoverX, setHoverX] = useState<number | null>(null);
   const H = width < 480 ? 230 : 270;
   const pad = { l: 44, r: 12, t: 44, b: 26 };
   const n = points.length - 1;
-  const top = Math.max(1, ...points.map((p) => Math.max(p.debt, p.cumYield + (showCashback ? p.cumCashback : 0))));
-  // o lucro fica negativo quando os juros passam do rendimento: a escala desce abaixo de zero
+  const plotW = width - pad.l - pad.r;
+  const earned = (p: ProjectionPoint) => p.cumYield + (showCashback ? p.cumCashback : 0);
+  const top = Math.max(1, ...points.map((p) => Math.max(p.debt, earned(p))));
+  // o rendimento não fica negativo com APY ≥ 0; a escala só desce abaixo de zero se um APY digitado for negativo
   const bottom = Math.min(0, ...points.map((p) => p.cumYield));
   const ticks = niceTicks(bottom < 0 ? bottom * 1.05 : 0, top * 1.05);
+  // as marcas param na última redonda abaixo do máximo: sem uma a mais, a linha do emprestado (US$ 13k numa escala que
+  // ia até 10k) ficava fora do gráfico
+  const yStep = ticks.length > 1 ? ticks[1] - ticks[0] : top;
+  while (ticks[ticks.length - 1] < top) ticks.push(ticks[ticks.length - 1] + yStep);
   const yMax = ticks[ticks.length - 1] || top;
   const yMin = Math.min(0, ticks[0]);
-  const x = (m: number) => pad.l + (n > 0 ? (m / n) * (width - pad.l - pad.r) : 0);
+  const x = (m: number) => pad.l + (n > 0 ? (m / n) * plotW : 0);
   const y = (v: number) => pad.t + (1 - (v - yMin) / (yMax - yMin || 1)) * (H - pad.t - pad.b);
+  // um valor entre dois meses, na reta que o desenho liga entre eles (os pontos vêm um por mês, a partir do 0)
+  const lerp = (t: number, f: (p: ProjectionPoint) => number) => {
+    const i = Math.max(0, Math.min(n, Math.floor(t)));
+    const j = Math.min(n, i + 1);
+    const w = Math.max(0, Math.min(1, t - i));
+    return f(points[i]) * (1 - w) + f(points[j]) * w;
+  };
   const area = (f: (p: ProjectionPoint) => number, g: (p: ProjectionPoint) => number) =>
     `M${points.map((p) => `${x(p.month)},${y(f(p))}`).join('L')}L${[...points].reverse().map((p) => `${x(p.month)},${y(g(p))}`).join('L')}Z`;
   const line = (f: (p: ProjectionPoint) => number) => `M${points.map((p) => `${x(p.month)},${y(f(p))}`).join('L')}`;
   const yearStep = n <= 18 ? 3 : n <= 36 ? 6 : n <= 72 ? 12 : 24;
   // marcas do eixo do tempo: o passo cresce até caberem (≈ 90px por rótulo "Nov 2028")
-  const fit = Math.max(2, Math.floor((width - pad.l - pad.r) / 90));
+  const fit = Math.max(2, Math.floor(plotW / 90));
   const tickStep = [yearStep, yearStep * 2, yearStep * 3, yearStep * 4, yearStep * 6].find((st) => n / st <= fit) ?? yearStep * 6;
   const xTicks = points.filter((p) => p.month % tickStep === 0 && (p.month === 0 || n - p.month >= tickStep / 2 || p.month === n));
-  const earned = (p: ProjectionPoint) => p.cumYield + (showCashback ? p.cumCashback : 0);
-  const onMove = (e: ReactPointerEvent<SVGSVGElement>) => {
-    const r = e.currentTarget.getBoundingClientRect();
-    const m = Math.round(((e.clientX - r.left - pad.l) / (width - pad.l - pad.r)) * n);
-    setHover(Math.max(0, Math.min(n, m)));
-  };
-  const hp = hover !== null ? points[hover] : null;
-  const flip = hp && x(hp.month) + 210 > width;
+  const principal = points[0]?.debt ?? 0;
   const visibleMarks = marks.filter((mk) => mk.month <= n).sort((a, b) => a.share - b.share);
+  const onMove = (e: ReactPointerEvent<SVGSVGElement>) => setHoverX(e.clientX - e.currentTarget.getBoundingClientRect().left);
+  const hoverMonth = hoverX === null || n <= 0 ? null : Math.max(0, Math.min(n, Math.round(((hoverX - pad.l) / plotW) * n)));
+  // perto (6 px) de uma linha de marca e mais perto dela que do ponto do mês, o balão fala da marca; senão, do mês
+  const hoverMark = hoverX === null || hoverMonth === null ? null : visibleMarks
+    .map((mk) => ({ mk, d: Math.abs(x(mk.at) - hoverX) }))
+    .filter((c) => c.d <= 6 && c.d < Math.abs(x(hoverMonth) - hoverX))
+    .sort((a, b) => a.d - b.d)[0]?.mk ?? null;
+  const tip = hoverMark
+    ? { t: hoverMark.at, px: x(hoverMark.at) }
+    : hoverMonth !== null ? { t: hoverMonth, px: x(hoverMonth) } : null;
+  const flip = tip && tip.px + 210 > width;
+  const tipVal = (f: (p: ProjectionPoint) => number) => (tip ? lerp(tip.t, f) : 0);
+  // no instante da marca os valores são da reta entre dois meses: "≈"
+  const approx = hoverMark ? '≈ ' : '';
+  const reachedIn = (m: number) => visibleMarks.filter((mk) => mk.month === m).map((mk) => `${num(mk.share * 100, 0)}%`);
+  // depois da marca de 100%: a faixa verde entre o devido (embaixo) e o rendido (em cima), do instante do cruzamento ao
+  // fim da janela. É o lucro se o rendido pagasse o que se deve (o max segura um APY digitado menor que a taxa)
+  const fullMark = visibleMarks.find((mk) => mk.share >= 1) ?? null;
+  const after = fullMark ? points.filter((p) => p.month > fullMark.at) : [];
+  const band = fullMark && after.length
+    ? `M${x(fullMark.at)},${y(lerp(fullMark.at, (p) => p.debt))}`
+      + after.map((p) => `L${x(p.month)},${y(Math.max(earned(p), p.debt))}`).join('')
+      + [...after].reverse().map((p) => `L${x(p.month)},${y(p.debt)}`).join('')
+      + 'Z'
+    : null;
+  // a área azul: até o rendido antes do cruzamento e até o devido depois, com o ponto exato do cruzamento no meio (sem
+  // ele, a reta entre o último mês abaixo e o primeiro acima abriria uma fresta entre o azul e o verde)
+  const blueArea = band && fullMark && !showCashback
+    ? (() => {
+        const before = points.filter((p) => p.month < fullMark.at);
+        const top = [
+          ...before.map((p) => `${x(p.month)},${y(p.cumYield)}`),
+          `${x(fullMark.at)},${y(lerp(fullMark.at, (p) => p.debt))}`,
+          ...after.map((p) => `${x(p.month)},${y(p.debt)}`),
+        ];
+        return `M${top.join('L')}L${x(n)},${y(0)}L${x(0)},${y(0)}Z`;
+      })()
+    : area((p) => p.cumYield, () => 0);
+  // o rótulo "lucro" dentro da faixa, no fim da janela, só quando ela já tem altura e largura para o texto
+  const last = points[n];
+  const bandLabel = band && fullMark && last && y(last.debt) - y(earned(last)) >= 20 && x(n) - x(fullMark.at) >= 90
+    ? { x: x(n) - 8, y: (y(last.debt) + y(earned(last))) / 2 + 4 }
+    : null;
+  const tipCovered = tip ? covered(tipVal(earned), tipVal((p) => p.debt)) : false;
+  const pinPoint = pinned !== null && pinned >= 0 && pinned <= n ? points[pinned] : null;
   return (
     <div>
       <div ref={box} className="relative w-full select-none">
-        <svg width={width} height={H} role="img" aria-label={label} className="block touch-pan-y" onPointerMove={onMove} onPointerDown={onMove} onPointerLeave={() => setHover(null)}>
+        <svg
+          width={width}
+          height={H}
+          role="img"
+          aria-label={label}
+          className={cx('block touch-pan-y', onPick && 'cursor-pointer')}
+          onPointerMove={onMove}
+          onPointerDown={onMove}
+          onPointerLeave={() => setHoverX(null)}
+          onClick={(e) => {
+            if (!onPick || n <= 0) return;
+            const px = e.clientX - e.currentTarget.getBoundingClientRect().left;
+            onPick(Math.max(0, Math.min(n, Math.round(((px - pad.l) / plotW) * n))));
+          }}
+        >
           <text x={pad.l - 6} y={pad.t - 10} textAnchor="end" className="fill-faint text-[11px]">{axisUnit()}</text>
           {ticks.map((t) => (
             <g key={t}>
@@ -131,7 +218,10 @@ export function ProjectionChart({ points, marks, showCashback, start, locale, la
               {p.month === 0 ? tr('now', 'hoje') : monthLabelFrom(start, p.month, locale)}
             </text>
           ))}
-          <path d={area((p) => p.cumYield, () => 0)} fill={BORROW_COLORS.yield} fillOpacity={0.28} />
+          {/* a área azul vai até o que se deve: depois dos 100%, o que passa da linha é a faixa verde (o rendido = o que paga
+              a dívida + o lucro), como a barra de "ao longo do tempo"; a linha azul segue o rendido inteiro */}
+          <path d={blueArea} fill={BORROW_COLORS.yield} fillOpacity={0.28} />
+          {band ? <path d={band} fill={BORROW_COLORS.leftOver} fillOpacity={0.38} /> : null}
           <path d={line((p) => p.cumYield)} fill="none" stroke={BORROW_COLORS.yield} strokeWidth={2} />
           {showCashback ? (
             <>
@@ -140,9 +230,12 @@ export function ProjectionChart({ points, marks, showCashback, start, locale, la
             </>
           ) : null}
           <path d={line((p) => p.debt)} fill="none" stroke={BORROW_COLORS.debt} strokeWidth={2} strokeDasharray="6 4" />
+          {bandLabel ? (
+            <text x={bandLabel.x} y={bandLabel.y} textAnchor="end" className="fill-ink text-[11px] font-medium">{tr('profit', 'lucro')}</text>
+          ) : null}
           {visibleMarks.map((mk, i) => {
             const full = mk.share >= 1;
-            const px = x(mk.month);
+            const px = x(mk.at);
             // no celular, as marcas de 5% e 10% ficam sem rótulo (muito perto do começo); a lista embaixo diz o mês
             const narrow = width < 520;
             const showLabel = !narrow || mk.share >= 0.25;
@@ -151,7 +244,8 @@ export function ProjectionChart({ points, marks, showCashback, start, locale, la
             return (
               <g key={mk.share}>
                 <line x1={px} x2={px} y1={ly + 6} y2={H - pad.b} stroke="var(--color-ink)" strokeOpacity={full ? 0.75 : 0.3} strokeWidth={full ? 1.5 : 1} strokeDasharray={full ? undefined : '3 3'} />
-                <circle cx={px} cy={y(earned(points[mk.month]))} r={full ? 5 : 3.5} fill={BORROW_COLORS.yield} stroke="var(--color-panel)" strokeWidth={2} />
+                {/* o ponto fica onde a curva cruza a fração: na altura de `share` × o que se deve naquele instante */}
+                <circle cx={px} cy={y(mk.share * lerp(mk.at, (p) => p.debt))} r={full ? 5 : 3.5} fill={BORROW_COLORS.yield} stroke="var(--color-panel)" strokeWidth={2} />
                 {showLabel ? (
                   <text x={px} y={ly + 2} textAnchor={px > width - 24 ? 'end' : 'middle'} className={cx('tnum text-[11px]', full ? 'fill-ink font-semibold' : 'fill-muted font-medium')}>
                     {num(mk.share * 100, 0)}%
@@ -160,33 +254,54 @@ export function ProjectionChart({ points, marks, showCashback, start, locale, la
               </g>
             );
           })}
-          {hp ? <line x1={x(hp.month)} x2={x(hp.month)} y1={pad.t} y2={H - pad.b} stroke="var(--color-line2)" strokeWidth={1} /> : null}
+          {/* o mês de "ao longo do tempo": linha violeta com um ponto em cada curva */}
+          {pinPoint ? (
+            <g aria-hidden>
+              <line x1={x(pinPoint.month)} x2={x(pinPoint.month)} y1={pad.t - 6} y2={H - pad.b} stroke="var(--color-accent)" strokeWidth={1.5} />
+              <circle cx={x(pinPoint.month)} cy={y(earned(pinPoint))} r={4.5} fill={BORROW_COLORS.yield} stroke="var(--color-panel)" strokeWidth={2} />
+              <circle cx={x(pinPoint.month)} cy={y(pinPoint.debt)} r={4.5} fill={BORROW_COLORS.debt} stroke="var(--color-panel)" strokeWidth={2} />
+            </g>
+          ) : null}
+          {tip ? <line x1={tip.px} x2={tip.px} y1={pad.t} y2={H - pad.b} stroke="var(--color-line2)" strokeWidth={1} /> : null}
         </svg>
-        {hp ? (
+        {tip ? (
           <div
             aria-hidden
             className="pointer-events-none absolute top-10 z-10 w-[200px] rounded-lg border border-line2 bg-bg/95 px-3 py-2 text-xs shadow-lg"
-            style={{ left: flip ? Math.max(0, x(hp.month) - 210) : x(hp.month) + 10 }}
+            style={{ left: flip ? Math.max(0, tip.px - 210) : tip.px + 10 }}
           >
-            <div className="mb-1 flex justify-between gap-2 font-medium text-ink">
-              <span>{hp.month === 0 ? tr('Today', 'Hoje') : monthLabelFrom(start, hp.month, locale)}</span>
-              <span className="tnum text-good">{hp.debt > 0 ? `${num(Math.min(100, (earned(hp) / hp.debt) * 100), 0)}% ${tr('paid', 'pago')}` : ''}</span>
-            </div>
-            <TipRow color="transparent" label={tr('Vault earned', 'O cofre rendeu')} value={usd(hp.cumYield + hp.cumInterest)} />
-            <TipRow color="transparent" label={tr('− loan interest', '− juros do empréstimo')} value={usd(hp.cumInterest)} />
-            <TipRow color={BORROW_COLORS.yield} label={tr('= profit', '= lucro')} value={usd(hp.cumYield)} />
-            {showCashback ? <TipRow color={BORROW_COLORS.cashback} label={tr('+ cashback', '+ cashback')} value={usd(hp.cumCashback)} /> : null}
-            <TipRow color={BORROW_COLORS.debt} dashed label={tr('Borrowed', 'Emprestado')} value={usd(hp.debt)} />
+            {hoverMark ? (
+              <div className="mb-1 flex justify-between gap-2 font-medium text-ink">
+                <span className="tnum text-good">{tr(`${num(hoverMark.share * 100, 0)}% reached`, `${num(hoverMark.share * 100, 0)}% alcançado`)}</span>
+                <span>{tr('by ', 'até ')}{monthLabelFrom(start, hoverMark.month, locale)}</span>
+              </div>
+            ) : (
+              <div className="mb-1 flex justify-between gap-2 font-medium text-ink">
+                <span>{tip.t === 0 ? tr('Today', 'Hoje') : monthLabelFrom(start, tip.t, locale)}</span>
+                <span className="tnum text-good">{tipVal((p) => p.debt) <= 0 ? '' : tipCovered ? tr(`+${profitPct(tipVal(earned), tipVal((p) => p.debt))}% profit`, `+${profitPct(tipVal(earned), tipVal((p) => p.debt))}% de lucro`) : `${paidPct(tipVal(earned) / tipVal((p) => p.debt))}% ${tr('paid', 'pago')}`}</span>
+              </div>
+            )}
+            <TipRow color={BORROW_COLORS.yield} label={tr('Vault earned', 'O cofre rendeu')} value={approx + usd(tipVal((p) => p.cumYield))} />
+            {showCashback ? <TipRow color={BORROW_COLORS.cashback} label={tr('+ cashback', '+ cashback')} value={approx + usd(tipVal((p) => p.cumCashback))} /> : null}
+            <TipRow color="transparent" label={tr('Borrowed', 'Emprestado')} value={usd(principal)} />
+            <TipRow color="transparent" label={tr('+ interest', '+ juros')} value={approx + usd(tipVal((p) => p.cumInterest))} />
+            <TipRow color={BORROW_COLORS.debt} dashed label={tr('= you owe', '= você deve')} value={approx + usd(tipVal((p) => p.debt))} />
+            {tipCovered ? (
+              <div className="mt-1 border-t border-line pt-1">
+                <TipRow color={BORROW_COLORS.leftOver} label={tr('profit', 'lucro')} value={`${approx}+${usd(tipVal(earned) - tipVal((p) => p.debt))}`} />
+              </div>
+            ) : null}
           </div>
         ) : null}
       </div>
       <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
-        <Legend color={BORROW_COLORS.yield} label={tr('Profit: vault yield − loan interest', 'Lucro: rendimento do cofre − juros do empréstimo')} />
+        <Legend color={BORROW_COLORS.yield} label={tr('What the vault earned', 'O que o cofre rendeu')} />
         {showCashback ? <Legend color={BORROW_COLORS.cashback} label={tr('+ the card cashback', '+ o cashback do cartão')} /> : null}
-        <Legend color={BORROW_COLORS.debt} dashed label={tr('What you borrowed', 'O que você pegou emprestado')} />
+        <Legend color={BORROW_COLORS.debt} dashed label={tr('What you owe: borrowed + interest', 'O que você deve: emprestado + juros')} />
+        {band ? <Legend color={BORROW_COLORS.leftOver} label={tr('After 100%: profit after repaying', 'Depois dos 100%: lucro depois de pagar')} /> : null}
       </ul>
       {marks.length ? (
-        <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs" aria-label={tr('When the profit reaches each part of the loan', 'Quando o lucro chega a cada parte do empréstimo')}>
+        <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs" aria-label={tr('When what the vault earned reaches each part of what you owe', 'Quando o que o cofre rendeu chega a cada parte do que você deve')}>
           {[...marks].sort((a, b) => a.share - b.share).map((mk) => (
             <li key={mk.share} className={cx('tnum', mk.share >= 1 ? 'font-medium text-ink' : 'text-muted')}>
               {num(mk.share * 100, 0)}% · {monthLabelFrom(start, mk.month, locale)}
@@ -197,8 +312,8 @@ export function ProjectionChart({ points, marks, showCashback, start, locale, la
       ) : null}
       <p className="mt-2 text-xs leading-relaxed text-muted">
         {tr(
-          'Blue is the profit of the collateral: what the vault has earned minus the loan interest, added up month by month. The dashed line is what you borrowed. Each vertical line is the month the profit reaches that part of the loan; at 100%, the profit alone would repay it.',
-          'O azul é o lucro da garantia: o que o cofre rendeu menos os juros do empréstimo, somado mês a mês. A linha tracejada é o que você pegou emprestado. Cada linha vertical é o mês em que o lucro chega àquela parte do empréstimo; em 100%, só o lucro já pagaria tudo.',
+          'Blue is what the vault has earned since today, added up month by month. The dashed line is what you owe: what you borrowed plus the interest, which goes into the debt and compounds, so it rises a little every month (at today’s rate, which is variable). Each vertical line is where the earnings reach that share of what you owe, and the list gives the month by which it gets there; at 100%, they would be enough to repay the loan with its interest. After that, green is the profit: what the vault would have earned beyond repaying it, also as a share of what you owe (+47% = 147% of it). They stay in the vault: the loan only goes down when you repay it.',
+          'O azul é o que o cofre rendeu desde hoje, somado mês a mês. A linha tracejada é o que você deve: o que pegou emprestado mais os juros, que entram na dívida e também rendem juros, então ela sobe um pouco todo mês (na taxa de hoje, que é variável). Cada linha vertical é onde o rendimento chega àquela parte do que você deve, e a lista diz até que mês ele chega lá; em 100%, ele daria para pagar o empréstimo com os juros. Depois disso, o verde é o lucro: o que o cofre teria rendido além de pagar, também como parte do que você deve (+47% = 147% dele). Ele fica no cofre: o empréstimo só cai quando você paga.',
         )}
         {showCashback
           ? tr(' Green, on top, adds the card cashback (your spending is paid with your own money, so it doesn’t add to the loan).', ' O verde, em cima, soma o cashback do cartão (o gasto é pago com o seu dinheiro, então não aumenta o empréstimo).')
@@ -209,23 +324,33 @@ export function ProjectionChart({ points, marks, showCashback, start, locale, la
           <table className="w-full text-left text-xs">
             <thead className="text-faint">
               <tr>
-                <th scope="col" className="px-3 py-2 font-medium">{tr('Month', 'Mês')}</th>
-                <th scope="col" className="px-3 py-2 text-right font-medium">{tr('Profit', 'Lucro')}</th>
-                {showCashback ? <th scope="col" className="px-3 py-2 text-right font-medium">Cashback</th> : null}
-                <th scope="col" className="px-3 py-2 text-right font-medium">{tr('Borrowed', 'Emprestado')}</th>
-                <th scope="col" className="px-3 py-2 text-right font-medium">{tr('Paid', 'Pago')}</th>
+                <th scope="col" className="px-2 py-2 sm:px-3 font-medium">{tr('Month', 'Mês')}</th>
+                <th scope="col" className="px-2 py-2 sm:px-3 text-right font-medium">{tr('Vault earned', 'O cofre rendeu')}</th>
+                {showCashback ? <th scope="col" className="px-2 py-2 sm:px-3 text-right font-medium">Cashback</th> : null}
+                <th scope="col" className="hidden px-2 py-2 text-right font-medium sm:table-cell sm:px-3">{tr('Interest', 'Juros')}</th>
+                <th scope="col" className="px-2 py-2 sm:px-3 text-right font-medium">{tr('You owe', 'Você deve')}</th>
+                <th scope="col" className="px-2 py-2 sm:px-3 text-right font-medium">{tr('Paid · profit', 'Pago · lucro')}</th>
               </tr>
             </thead>
             <tbody className="tnum">
-              {points.filter((p) => p.month % yearStep === 0 || marks.some((mk) => mk.month === p.month)).map((p) => (
-                <tr key={p.month} className="border-t border-line">
-                  <th scope="row" className="px-3 py-1.5 font-normal text-muted">{p.month === 0 ? tr('Today', 'Hoje') : monthLabelFrom(start, p.month, locale)}</th>
-                  <td className="px-3 py-1.5 text-right">{usd(p.cumYield)}</td>
-                  {showCashback ? <td className="px-3 py-1.5 text-right">{usd(p.cumCashback)}</td> : null}
-                  <td className="px-3 py-1.5 text-right">{usd(p.debt)}</td>
-                  <td className="px-3 py-1.5 text-right">{p.debt > 0 ? `${num(Math.min(100, (earned(p) / p.debt) * 100), 0)}%` : '—'}</td>
-                </tr>
-              ))}
+              {points.filter((p) => p.month % yearStep === 0 || marks.some((mk) => mk.month === p.month)).map((p) => {
+                const reached = reachedIn(p.month);
+                return (
+                  <tr key={p.month} className="border-t border-line">
+                    <th scope="row" className="px-2 py-1.5 sm:px-3 font-normal text-muted">
+                      <span className="whitespace-nowrap">{p.month === 0 ? tr('Today', 'Hoje') : monthLabelFrom(start, p.month, locale)}</span>
+                      {reached.length ? <span className="block text-faint">{tr(`${reached.join(', ')} reached`, `chegou a ${reached.join(', ')}`)}</span> : null}
+                    </th>
+                    <td className="px-2 py-1.5 sm:px-3 text-right">{usd(p.cumYield)}</td>
+                    {showCashback ? <td className="px-2 py-1.5 sm:px-3 text-right">{usd(p.cumCashback)}</td> : null}
+                    <td className="hidden px-2 py-1.5 text-right sm:table-cell sm:px-3">{usd(p.cumInterest)}</td>
+                    <td className="px-2 py-1.5 sm:px-3 text-right">{usd(p.debt)}</td>
+                    <td className={cx('px-2 py-1.5 sm:px-3 text-right', covered(earned(p), p.debt) && 'text-good')}>
+                      {p.debt <= 0 ? '—' : covered(earned(p), p.debt) ? `+${profitPct(earned(p), p.debt)}% (+${usd(earned(p) - p.debt)})` : `${paidPct(earned(p) / p.debt)}%`}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </AsTable>

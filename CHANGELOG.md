@@ -4,6 +4,28 @@ All notable changes to this project. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-07
+
+### Added
+
+- Borrow: **Your position over time**, below the collateral and borrow panels, a month slider that opens on today and goes to the end of the chart's window, with the collateral, borrow power, what you owe and borrow power used in that month, side by side like the panels above, and a bar of how much of what you owe the vault's earnings would cover; past 100% the bar passes the "owed" tick and the excess turns green, "profit". Quick jumps to today, the 100% month and the end; clicking the chart picks a month, and the chosen month shows on the chart as a violet line. Same rates held still as the chart, no new card spending, prices still: a scenario, not a forecast.
+- Borrow: after the 100% mark, the chart shows the profit after repaying: a green band between what you owe and what the vault earned (the blue area now stops at the dashed line), a "profit" label, a legend entry, the "% paid" carries on as "% profit" (profit over what you owe: 147% of it reads "+47% profit") in the tooltip, with a "profit" row, and in the position bar, instead of capping at "100% paid", and the table's last column reads "Paid · profit" (`+35% (+$1,917.17)` once covered).
+
+### Fixed
+
+- Borrow: the loan's dashed line no longer falls off the top of the profit chart when the loan is above the last round axis mark (scenario 3 over 10 years).
+- Borrow: the payoff chart's dashed line and its table showed a flat "Borrowed" balance, as if interest never reached the debt. ether.fi adds the interest to the loan and compounds it, so the chart now shows what the vault has earned against what you owe (borrowed plus interest, rising every month), the table has "Vault earned", "Interest" (from 640 px up), "You owe" and "Paid" = earned ÷ owed, and the tooltip reads "Vault earned / Borrowed / + interest / = you owe". The 100% month is the same as before; at today's sample rates no mark moved.
+- Borrow: the 5/10/25/50/75% marks were drawn on the first month already past the share, so the "5%" dot sat at 9% and hovering it said 9%. Each mark's line and dot now sit where the curve crosses that share (between two months, the dot at exactly that height), hovering a mark says "5% reached by Jan 2027", the list and the table keep the month by which it gets there, and no month shows a share it hasn't reached yet (percentages round down).
+
+### Changed
+
+- Borrow: *Your borrow* lines up with *Your collateral*. The rate tip is now a glowing light bulb in the panel's title: hover or focus shows it, a click or tap pins it, Esc or a click outside closes it. The loans not in use open from an *Add borrow* button as cards with the logo, the currency and the app's rate, like *Add collateral*.
+- Borrow: the card spending and cashback box is gone from *Your borrow* (the chart never counted cashback), and so is the footnote link to Earnings.
+- Borrow: no more *Details* switch. *Your borrow* always lists each loan asset with its amount and rate as fields you can edit (the asset picker for the connected loan included); the balances on top stay grouped by currency.
+- Borrow: the payoff card now reads "The profit would pay the loan in…", the chart caption says the earnings "would be enough to repay" the loan and that they stay in the vault until you repay, and the intro speaks of the yield covering the interest: scenarios, not promises, like the rest of the screen.
+- Borrow: with the chart now comparing earnings with what you owe, its title reads "How much of what you owe the vault's yield would cover, month by month", and the legend, caption and "Why" note say the interest goes into the debt and compounds at a variable rate, and that the loan only goes down when you repay it.
+- README (English and Portuguese), AGENTS.md and the Borrow screenshot describe the screen as it is now.
+
 ## [0.3.0] - 2026-11-06
 
 ### Added
@@ -83,7 +105,8 @@ First public version.
 - The OAuth callback is handled only with a sign-in pending and shows fixed messages, never text from the URL. The token refresh runs once even when several requests expire together.
 - The dev-only `/__fixtures` endpoint answers only the local machine and is sent with `no-store`; its code no longer ships in the production bundle.
 
-[Unreleased]: https://github.com/rogeriomr/lighthouse-for-etherfi-cash/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/rogeriomr/lighthouse-for-etherfi-cash/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/rogeriomr/lighthouse-for-etherfi-cash/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/rogeriomr/lighthouse-for-etherfi-cash/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/rogeriomr/lighthouse-for-etherfi-cash/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/rogeriomr/lighthouse-for-etherfi-cash/releases/tag/v0.1.0

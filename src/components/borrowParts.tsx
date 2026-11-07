@@ -1,4 +1,4 @@
-import { useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Lightbulb, Plus, RefreshCw, RotateCcw, Trash2 } from 'lucide-react';
 import {
@@ -9,7 +9,6 @@ import {
   MARKET_ASSETS,
   OBSERVED_RATES,
   APR_MAX,
-  CASHBACK_PCT_MAX,
   PERIOD_YEARS,
   debtGroups,
   type CarryPeriod,
@@ -117,24 +116,6 @@ export function NumberField({ id, value, onChange, max, decimals = 2, prefix, su
   );
 }
 
-/** Interruptor (role="switch"): o "Detalhes" do empréstimo. 44px de toque pelo `tap`. */
-export function Switch({ checked, onChange, children }: { checked: boolean; onChange: (v: boolean) => void; children: ReactNode }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      onClick={() => onChange(!checked)}
-      className="tap inline-flex cursor-pointer items-center gap-2 rounded-lg py-1 text-xs text-muted transition-colors hover:text-ink"
-    >
-      <span className={cx('relative h-5 w-9 shrink-0 rounded-full transition-colors', checked ? 'bg-accent' : 'bg-line2')}>
-        <span className={cx('absolute top-0.5 size-4 rounded-full bg-ink transition-[left] duration-200', checked ? 'left-[18px]' : 'left-0.5')} />
-      </span>
-      {children}
-    </button>
-  );
-}
-
 /** Chip que liga e desliga (as marcas do gráfico, o cashback). */
 export function ToggleChip({ on, onChange, children }: { on: boolean; onChange: (v: boolean) => void; children: ReactNode }) {
   return (
@@ -216,7 +197,7 @@ export function CarryPanel({ s, paidMonths, chart, horizonControl, period, onPer
   /** O período do número de cima e das barras (7 dias, 1 mês, 1 ano) */
   period: CarryPeriod;
   onPeriod: (p: CarryPeriod) => void;
-  /** O mês em que o lucro da garantia paga 5/10/25/50/75/100% do empréstimo (sem cashback); null = não chega em 50 anos */
+  /** O mês em que o rendimento chega a 5/10/25/50/75/100% do que se deve (emprestado + juros, sem cashback); null = não chega em 50 anos */
   paidMonths: Record<number, number | null>;
   chart: ReactNode;
   horizonControl: ReactNode;
@@ -284,7 +265,7 @@ export function CarryPanel({ s, paidMonths, chart, horizonControl, period, onPer
           sub={s.breakEvenDebt === null ? tr('no interest rate set', 'sem taxa de juros') : tr(`of debt at today’s rates · you owe ${usd(debt)}`, `de dívida, nas taxas de hoje · você deve ${usd(debt)}`)}
         />
         <Kpi
-          term={tr('The profit pays the loan in', 'O lucro paga o empréstimo em')}
+          term={tr('The profit would pay the loan in', 'O lucro pagaria o empréstimo em')}
           value={debt <= 0 ? '—' : full === null ? tr('50+ years', '50+ anos') : durationText(full, locale)}
           tone={debt > 0 && full !== null ? 'good' : undefined}
           sub={debt <= 0
@@ -298,7 +279,7 @@ export function CarryPanel({ s, paidMonths, chart, horizonControl, period, onPer
       {debt > 0 ? (
         <div className="mt-6">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-            <h3 className="text-sm font-medium text-ink">{tr('How much of the loan the collateral’s profit has paid', 'Quanto do empréstimo o lucro da garantia já pagou')}</h3>
+            <h3 className="text-sm font-medium text-ink">{tr('How much of what you owe the vault’s yield would cover, month by month', 'Quanto do que você deve o rendimento do cofre cobriria, mês a mês')}</h3>
             {horizonControl}
           </div>
           {chart}
@@ -318,8 +299,8 @@ export function CarryPanel({ s, paidMonths, chart, horizonControl, period, onPer
         ) : null}
         <Why>
           {tr(
-            'Yield = each collateral’s value × its APY; interest = each loan × its rate, both a year at today’s rates. The chart keeps today’s loan (no new spending) and adds up, month by month, the yield minus the interest: the collateral’s profit. Where it reaches what you borrowed, the profit alone would repay the loan; the card cashback stays out of it. It is a yardstick, not a repayment: the yield stays in the vault and the debt only goes down when you repay it. A liquidUSD balance can’t repay a USDT loan directly (it can repay USDC). APY and loan rates are variable; cashback is paid in ETHFI, whose price changes.',
-            'Rendimento = valor de cada garantia × o APY dela; juros = cada empréstimo × a taxa dele, os dois por ano, nas taxas de hoje. O gráfico mantém o empréstimo de hoje (sem gasto novo) e soma, mês a mês, o rendimento menos os juros: o lucro da garantia. Onde ele alcança o que você pegou emprestado, só o lucro já pagaria o empréstimo; o cashback do cartão fica fora. É uma régua, não um pagamento: o rendimento fica no cofre e a dívida só cai quando você paga. Saldo em liquidUSD não paga empréstimo em USDT direto (paga o de USDC). APY e taxas são variáveis; o cashback é pago em ETHFI, de preço variável.',
+            'Yield = each collateral’s value × its APY; interest = each loan × its rate, both a year at today’s rates. The chart keeps today’s loan (no new spending) and adds up, month by month, what the vault has earned, against what you owe: what you borrowed plus the interest, which goes into the debt and compounds. Where the earnings reach what you owe, they would be enough to repay the loan with its interest (the same month the profit, yield minus interest, reaches what you borrowed); the card cashback stays out of it. It is a yardstick, not a repayment: the yield stays in the vault and the debt only goes down when you repay it. A liquidUSD balance can’t repay a USDT loan directly (it can repay USDC). APY and loan rates are variable; cashback is paid in ETHFI, whose price changes.',
+            'Rendimento = valor de cada garantia × o APY dela; juros = cada empréstimo × a taxa dele, os dois por ano, nas taxas de hoje. O gráfico mantém o empréstimo de hoje (sem gasto novo) e soma, mês a mês, o que o cofre rendeu, contra o que você deve: o que pegou emprestado mais os juros, que entram na dívida e também rendem juros. Onde o rendimento alcança o que você deve, ele daria para pagar o empréstimo com os juros (é o mesmo mês em que o lucro, rendimento menos juros, alcança o que você pegou emprestado); o cashback do cartão fica fora. É uma régua, não um pagamento: o rendimento fica no cofre e a dívida só cai quando você paga. Saldo em liquidUSD não paga empréstimo em USDT direto (paga o de USDC). APY e taxas são variáveis; o cashback é pago em ETHFI, de preço variável.',
           )}
         </Why>
       </div>
@@ -560,65 +541,140 @@ function PerMonth({ value, tone }: { value: number; tone: 'good' | 'bad' }) {
 
 // ---------- empréstimo ----------
 
-const GROUP_ICON: Record<DebtGroup, DebtAsset[]> = { usd: ['USDT', 'USDC'], eth: ['WETH'], eur: ['EURC'] };
-
-/** Ícones sobrepostos (o grupo do dólar com USDT e USDC). */
-function ChipStack({ assets }: { assets: readonly string[] }) {
-  return (
-    <span className="flex shrink-0 -space-x-3">
-      {assets.map((a) => (
-        <span key={a} className="rounded-full ring-2 ring-panel">
-          <AssetChip asset={a} tint="bg-panel2 text-muted" />
-        </span>
-      ))}
-    </span>
-  );
-}
-
 /**
- * O empréstimo como o app da ether.fi mostra: os ativos ativos (o que se deve) e os disponíveis (com a taxa). Na visão
- * normal, agrupado por moeda: dólar (USDT e USDC juntos), ETH e euro, nunca somados entre si. "Detalhes" separa ativo
- * por ativo e deixa mudar valor e taxa (vira simulação). O conector só informa o total: ele fica no ativo escolhido.
+ * O empréstimo como o app da ether.fi mostra: os ativos ativos (o que se deve) e os disponíveis (com a taxa). Os saldos
+ * do topo vêm agrupados por moeda: dólar (USDT e USDC juntos), ETH e euro, nunca somados entre si; a lista mostra ativo
+ * por ativo, com valor e taxa editáveis (mexer vira simulação). O conector só informa o total: ele fica no ativo escolhido.
  */
 export type BorrowTip = { kind: 'cheaper'; t: RateTip } | { kind: 'lowest'; asset: DebtAsset; apr: number; other: DebtAsset; otherApr: number };
 
 /**
- * O balão de dica do empréstimo: só informação, sem dizer o que fazer. Com uma dívida num ativo mais caro que outro da
- * mesma moeda, a diferença por ano; com a dívida já no mais barato, isso mesmo. E o que muda além da taxa: o liquidUSD
- * paga USDC direto, não USDT; um empréstimo em WETH sai mais barato, mas cresce quando o ETH sobe.
+ * A dica do empréstimo como uma lâmpada no título do painel, acesa (um brilho suave; parada com "reduzir movimento"):
+ * passar o mouse ou focar mostra o balão, tocar ou clicar fixa e solta. Só informação, sem dizer o que fazer. Com uma
+ * dívida num ativo mais caro que outro da mesma moeda, a diferença por ano; com a dívida já no mais barato, isso mesmo. E
+ * o que muda além da taxa: o liquidUSD paga USDC direto, não USDT; um empréstimo em WETH sai mais barato, mas cresce
+ * quando o ETH sobe. Esc ou um clique fora fecham.
  */
-function RateBalloon({ tip }: { tip: BorrowTip }) {
+function TipBulb({ tip }: { tip: BorrowTip }) {
   const tr = useTr();
+  const id = useId();
+  const [pinned, setPinned] = useState(false);
+  const [hover, setHover] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+  const open = pinned || hover;
+  useEffect(() => {
+    if (!pinned) return;
+    const away = (e: PointerEvent) => { if (box.current && !box.current.contains(e.target as Node)) setPinned(false); };
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') { setPinned(false); setHover(false); } };
+    document.addEventListener('pointerdown', away);
+    document.addEventListener('keydown', esc);
+    return () => {
+      document.removeEventListener('pointerdown', away);
+      document.removeEventListener('keydown', esc);
+    };
+  }, [pinned]);
   return (
-    <div role="note" className="mt-4 rounded-xl border border-info/30 bg-info/10 px-3.5 py-3 text-sm leading-relaxed">
-      <p className="flex items-start gap-2 text-ink">
-        <Lightbulb aria-hidden className="mt-0.5 size-4 shrink-0 text-info" />
-        <span>
-          {tip.kind === 'cheaper'
-            ? nb(tr(
-              `${tip.t.to} is at ${pct(tip.t.toApr, 2)} and ${tip.t.from} at ${pct(tip.t.fromApr, 2)}: the same ${usd(tip.t.amount)} in ${tip.t.to} would cost ≈ ${usd(tip.t.savingYear)} a year less (≈ ${usd(tip.t.savingYear / 12)} a month).`,
-              `O ${tip.t.to} está a ${pct(tip.t.toApr, 2)} e o ${tip.t.from} a ${pct(tip.t.fromApr, 2)}: os mesmos ${usd(tip.t.amount)} em ${tip.t.to} custariam ≈ ${usd(tip.t.savingYear)} a menos por ano (≈ ${usd(tip.t.savingYear / 12)} por mês).`,
-            ))
-            : nb(tr(
-              `Your dollar loan is already at the lowest dollar rate: ${tip.asset} ${pct(tip.apr, 2)} vs ${tip.other} ${pct(tip.otherApr, 2)}.`,
-              `O seu empréstimo em dólar já está na menor taxa em dólar: ${tip.asset} ${pct(tip.apr, 2)} × ${tip.other} ${pct(tip.otherApr, 2)}.`,
-            ))}
-        </span>
-      </p>
-      <p className="mt-1.5 pl-6 text-xs text-muted">
-        {tr(
-          `Beyond the rate: a USD Yield (liquidUSD) balance repays a USDC loan directly, not a USDT one. A WETH loan (${pct(OBSERVED_RATES.rates.WETH, 2)}) is cheaper but grows when ETH rises. Rates change; check the app.`,
-          `Além da taxa: saldo no USD Yield (liquidUSD) paga empréstimo em USDC direto, não em USDT. O empréstimo em WETH (${pct(OBSERVED_RATES.rates.WETH, 2)}) é mais barato, mas cresce quando o ETH sobe. As taxas mudam; confira no app.`,
+    <div
+      ref={box}
+      className="relative"
+      onPointerEnter={(e) => { if (e.pointerType === 'mouse') setHover(true); }}
+      onPointerLeave={(e) => { if (e.pointerType === 'mouse') setHover(false); }}
+      onFocus={() => setHover(true)}
+      onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setHover(false); }}
+      onKeyDown={(e) => { if (e.key === 'Escape') { setPinned(false); setHover(false); } }}
+    >
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={id}
+        aria-label={tr('Tip about your loan rate', 'Dica sobre a taxa do seu empréstimo')}
+        onClick={() => setPinned((v) => !v)}
+        className={cx(
+          'tap relative -my-1 flex size-8 cursor-pointer items-center justify-center rounded-full border transition-colors',
+          open ? 'border-info/60 bg-info/15' : 'border-info/30 bg-info/10 hover:border-info/60 hover:bg-info/15',
         )}
-      </p>
+      >
+        {/* o brilho: um halo que respira devagar atrás do ícone */}
+        <span aria-hidden className="absolute inset-0 rounded-full bg-info/25 blur-md motion-safe:animate-pulse" />
+        <Lightbulb aria-hidden className="relative size-4 text-info drop-shadow-[0_0_6px_var(--color-info)]" />
+      </button>
+      <div
+        id={id}
+        role="note"
+        hidden={!open}
+        className="absolute right-0 top-full z-30 mt-2 w-[min(22rem,calc(100vw-4.5rem))] rounded-xl border border-info/30 bg-bg/95 px-3.5 py-3 text-left text-sm leading-relaxed shadow-lg backdrop-blur"
+      >
+        <p className="flex items-start gap-2 text-ink">
+          <Lightbulb aria-hidden className="mt-0.5 size-4 shrink-0 text-info" />
+          <span>
+            {tip.kind === 'cheaper'
+              ? nb(tr(
+                `${tip.t.to} is at ${pct(tip.t.toApr, 2)} and ${tip.t.from} at ${pct(tip.t.fromApr, 2)}: the same ${usd(tip.t.amount)} in ${tip.t.to} would cost ≈ ${usd(tip.t.savingYear)} a year less (≈ ${usd(tip.t.savingYear / 12)} a month).`,
+                `O ${tip.t.to} está a ${pct(tip.t.toApr, 2)} e o ${tip.t.from} a ${pct(tip.t.fromApr, 2)}: os mesmos ${usd(tip.t.amount)} em ${tip.t.to} custariam ≈ ${usd(tip.t.savingYear)} a menos por ano (≈ ${usd(tip.t.savingYear / 12)} por mês).`,
+              ))
+              : nb(tr(
+                `Your dollar loan is already at the lowest dollar rate: ${tip.asset} ${pct(tip.apr, 2)} vs ${tip.other} ${pct(tip.otherApr, 2)}.`,
+                `O seu empréstimo em dólar já está na menor taxa em dólar: ${tip.asset} ${pct(tip.apr, 2)} × ${tip.other} ${pct(tip.otherApr, 2)}.`,
+              ))}
+          </span>
+        </p>
+        <p className="mt-1.5 pl-6 text-xs text-muted">
+          {tr(
+            `Beyond the rate: a USD Yield (liquidUSD) balance repays a USDC loan directly, not a USDT one. A WETH loan (${pct(OBSERVED_RATES.rates.WETH, 2)}) is cheaper but grows when ETH rises. Rates change; check the app.`,
+            `Além da taxa: saldo no USD Yield (liquidUSD) paga empréstimo em USDC direto, não em USDT. O empréstimo em WETH (${pct(OBSERVED_RATES.rates.WETH, 2)}) é mais barato, mas cresce quando o ETH sobe. As taxas mudam; confira no app.`,
+          )}
+        </p>
+      </div>
     </div>
   );
 }
 
-export function BorrowPanel({ debts, details, onDetails, accountAsset, onAccountAsset, accountLoan, onAmount, onApr, onAprReset, aprCustom, onAdd, onRemove, spend, onSpend, cashbackPct, onCashbackPct, monthlyCashback, s, tip }: {
+/**
+ * "Adicionar empréstimo" em cards, como o da garantia: cada ativo que ainda não está na lista, com o logo, a moeda e a
+ * taxa que o app mostrava. Um toque adiciona à simulação. Esc ou "Fechar" saem.
+ */
+function DebtPicker({ assets, groupName, onPick, onClose }: { assets: DebtAsset[]; groupName: Record<DebtGroup, string>; onPick: (a: DebtAsset) => void; onClose: () => void }) {
+  const tr = useTr();
+  return (
+    <div
+      role="group"
+      aria-label={tr('Choose a loan to simulate', 'Escolha o empréstimo para simular')}
+      onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}
+      className="rounded-xl border border-line2 bg-panel2/40 p-3"
+    >
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <h3 className="text-xs font-medium uppercase tracking-[0.1em] text-faint">{tr('Available loans', 'Empréstimos disponíveis')}</h3>
+        <Button variant="ghost" className="px-2 py-1 text-xs" onClick={onClose}>{tr('Close', 'Fechar')}</Button>
+      </div>
+      <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-2">
+        {assets.map((a, i) => (
+          <button
+            key={a}
+            type="button"
+            autoFocus={i === 0}
+            onClick={() => onPick(a)}
+            aria-label={tr(`Simulate a ${a} loan at ${pct(OBSERVED_RATES.rates[a], 2)}`, `Simular um empréstimo em ${a} a ${pct(OBSERVED_RATES.rates[a], 2)}`)}
+            className="flex cursor-pointer items-center gap-3 rounded-xl border border-line bg-panel px-3 py-3 text-left transition-colors hover:border-accent/50 hover:bg-panel2 focus-visible:outline-2 focus-visible:outline-accent"
+          >
+            <span className="scale-125"><AssetChip asset={a} tint="bg-panel2 text-muted" /></span>
+            <span className="ml-1 min-w-0 flex-1">
+              <span className="block truncate font-medium text-ink">{a}</span>
+              <span className="block truncate text-xs text-faint">{groupName[DEBT_GROUP_OF[a]]}</span>
+            </span>
+            <span className="text-right">
+              <span className="tnum block font-display text-lg font-semibold text-ink">{pct(OBSERVED_RATES.rates[a], 2)}</span>
+              <span className="block text-[11px] text-faint">APR</span>
+            </span>
+          </button>
+        ))}
+      </div>
+      <p className="mt-1.5 text-[11px] text-faint">{tr(`Rates as shown in the ether.fi app on ${dateShort(OBSERVED_RATES.date)}; they’re variable.`, `Taxas como o app da ether.fi mostrava em ${dateShort(OBSERVED_RATES.date)}; elas variam.`)}</p>
+    </div>
+  );
+}
+
+export function BorrowPanel({ debts, accountAsset, onAccountAsset, accountLoan, onAmount, onApr, onAprReset, aprCustom, onAdd, onRemove, s, tip }: {
   debts: DebtLine[];
-  details: boolean;
-  onDetails: (v: boolean) => void;
   accountAsset: DebtAsset;
   onAccountAsset: (a: DebtAsset) => void;
   /** A dívida ainda é a da conta (sem simulação): o ativo dela pode ser trocado */
@@ -629,24 +685,18 @@ export function BorrowPanel({ debts, details, onDetails, accountAsset, onAccount
   aprCustom: (asset: DebtAsset) => boolean;
   onAdd: (asset: DebtAsset) => void;
   onRemove: (asset: DebtAsset) => void;
-  spend: number;
-  onSpend: (n: number) => void;
-  /** Taxa de cashback da tela, em % (3 por padrão) */
-  cashbackPct: number;
-  onCashbackPct: (n: number) => void;
-  monthlyCashback: number;
   s: BorrowSummary;
   /** A dica de taxa (da tela): um ativo mais barato na mesma moeda, ou a confirmação de que já está no mais barato */
   tip: BorrowTip | null;
 }) {
   const tr = useTr();
-  const id = useId();
+  const [adding, setAdding] = useState(false);
   const groups = debtGroups(debts);
   const available = DEBT_ASSETS.filter((a) => !debts.some((d) => d.asset === a));
   const groupName: Record<DebtGroup, string> = { usd: tr('Dollar', 'Dólar'), eth: 'ETH', eur: tr('Euro', 'Euro') };
   return (
     <Panel className="flex flex-col">
-      <PanelTitle hint={<Switch checked={details} onChange={onDetails}>{tr('Details', 'Detalhes')}</Switch>}>{tr('Your borrow', 'O seu empréstimo')}</PanelTitle>
+      <PanelTitle hint={tip ? <TipBulb tip={tip} /> : undefined}>{tr('Your borrow', 'O seu empréstimo')}</PanelTitle>
       <dl className="mb-2 flex flex-wrap gap-x-6 gap-y-2 border-b border-line pb-4">
         {groups.length ? groups.map((g) => (
           <MiniStat key={g.group} term={tr(`${groupName[g.group]} balance`, `Saldo em ${groupName[g.group].toLowerCase() === 'eth' ? 'ETH' : groupName[g.group].toLowerCase()}`)} value={usd(g.amount)} />
@@ -656,27 +706,9 @@ export function BorrowPanel({ debts, details, onDetails, accountAsset, onAccount
         <MiniStat term={tr('Power used', 'Poder usado')} value={Number.isFinite(s.borrowPowerUsed) ? pct(s.borrowPowerUsed * 100, 1) : '—'} />
       </dl>
 
-      {tip ? <RateBalloon tip={tip} /> : null}
-
       <h3 className="mt-3 text-xs font-medium uppercase tracking-[0.1em] text-faint">{tr('Active', 'Ativos')}</h3>
       {debts.length === 0 ? (
         <p className="py-3 text-sm text-muted">{tr('No loan. Pick one below to simulate.', 'Nenhum empréstimo. Escolha um abaixo para simular.')}</p>
-      ) : !details ? (
-        <ul className="divide-y divide-line">
-          {groups.map((g) => (
-            <li key={g.group} className="flex items-center gap-3 py-3">
-              <ChipStack assets={g.assets.length ? g.assets : GROUP_ICON[g.group]} />
-              <div className="min-w-0 flex-1">
-                <div className="font-medium text-ink">{groupName[g.group]}</div>
-                <div className="tnum text-xs text-faint">{g.assets.join(' · ')} · {pct(g.apr, 2)}</div>
-              </div>
-              <div className="text-right">
-                <div className="tnum font-medium text-ink">{usd(g.amount)}</div>
-                <div className="text-xs"><PerMonth value={(g.amount * g.apr) / 100 / 12} tone="bad" /></div>
-              </div>
-            </li>
-          ))}
-        </ul>
       ) : (
         <ul className="divide-y divide-line">
           {debts.map((d) => (
@@ -719,50 +751,27 @@ export function BorrowPanel({ debts, details, onDetails, accountAsset, onAccount
           ))}
         </ul>
       )}
-      {details && accountLoan ? (
+      {accountLoan && debts.length > 0 ? (
         <p className="text-xs text-faint">{tr('The connector reports how much you owe, not in which asset: pick the one your app shows.', 'O conector informa quanto você deve, não em qual ativo: escolha o que o seu app mostra.')}</p>
       ) : null}
 
-      {available.length ? (
-        <>
-          <h3 className="mt-4 text-xs font-medium uppercase tracking-[0.1em] text-faint">{tr('Available', 'Disponíveis')}</h3>
-          <ul className="divide-y divide-line">
-            {available.map((a) => (
-              <li key={a} className="flex items-center gap-3 py-2.5">
-                <AssetChip asset={a} tint="bg-panel2 text-muted" />
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm text-ink">{a}</div>
-                  <div className="text-xs text-faint">{groupName[DEBT_GROUP_OF[a]]}</div>
-                </div>
-                <span className="tnum text-sm text-muted">{pct(OBSERVED_RATES.rates[a], 2)}</span>
-                <Button variant="ghost" className="px-2.5 text-xs" onClick={() => onAdd(a)} aria-label={tr(`Simulate a ${a} loan`, `Simular um empréstimo em ${a}`)}>
-                  <Plus aria-hidden className="size-3.5" />
-                  {tr('Simulate', 'Simular')}
-                </Button>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-1 text-xs text-faint">{tr(`Rates as shown in the ether.fi app on ${dateShort(OBSERVED_RATES.date)} · variable`, `Taxas como o app da ether.fi mostrava em ${dateShort(OBSERVED_RATES.date)} · variáveis`)}</p>
-        </>
-      ) : null}
-
-      <div className="mt-4 rounded-xl border border-line bg-panel2/40 p-4">
-        <div className="grid grid-cols-[1fr_6.5rem] gap-2">
-          <div>
-            <label htmlFor={`${id}-spend`} className="mb-1.5 block text-xs text-muted">{tr('Card spending a month', 'Gasto no cartão por mês')}</label>
-            <NumberField id={`${id}-spend`} value={spend} max={1e7} prefix="$" onChange={onSpend} />
-          </div>
-          <div>
-            <label htmlFor={`${id}-cb`} className="mb-1.5 block text-xs text-muted">Cashback</label>
-            <NumberField id={`${id}-cb`} value={cashbackPct} max={CASHBACK_PCT_MAX} suffix="%" onChange={onCashbackPct} />
-          </div>
-        </div>
-        <p className="mt-1.5 text-xs text-faint">
-          {nb(tr(
-            `≈ ${usd(monthlyCashback)} of cashback a month, paid in ETHFI. Spending is your card average; this purchase money is yours, not new debt.`,
-            `≈ ${usd(monthlyCashback)} de cashback por mês, pago em ETHFI. O gasto é a média do seu cartão; esse gasto sai do seu dinheiro, não vira dívida nova.`,
-          ))}
-        </p>
+      <div className="mt-3">
+        {adding && available.length ? (
+          <DebtPicker
+            assets={available}
+            groupName={groupName}
+            onPick={(a) => {
+              onAdd(a);
+              setAdding(false);
+            }}
+            onClose={() => setAdding(false)}
+          />
+        ) : (
+          <Button className="w-full justify-center border-dashed" onClick={() => setAdding(true)} disabled={!available.length}>
+            <Plus aria-hidden className="size-4" />
+            {tr('Add borrow', 'Adicionar empréstimo')}
+          </Button>
+        )}
       </div>
     </Panel>
   );
