@@ -1,7 +1,7 @@
 {
   "name": "lighthouse-for-etherfi-cash",
   "private": true,
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Your card, explained. Open-source, read-only dashboard for ether.fi Cash accounts that runs entirely in your browser.",
   "license": "MIT",
   "author": "@rogeriomenezesx (https://x.com/rogeriomenezesx)",
