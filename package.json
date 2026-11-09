@@ -30,16 +30,16 @@
     "earnings": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/earnings.mts"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.3.3",
+    "@tailwindcss/vite": "^4.3.4",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "@vitejs/plugin-react": "^6.1.2",
-    "eslint": "^10.13.0",
+    "@vitejs/plugin-react": "^6.2.1",
+    "eslint": "^10.14.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
-    "typescript-eslint": "^8.71.2",
-    "vite": "^8.3.0"
+    "typescript-eslint": "^8.72.1",
+    "vite": "^8.3.6"
   },
   "dependencies": {
     "@ark-ui/react": "^5.39.3",
